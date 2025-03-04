@@ -1,20 +1,40 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  // 配置@/
-  resolve: {
-    alias: {
-      '@': '/src'
-    }
-  },
-  // 配置less
-  css: {
-    preprocessorOptions: {
-      less: {
-        javascriptEnabled: true
+import Components from 'unplugin-vue-components/vite'
+import { VantResolver } from 'unplugin-vue-components/resolvers'
+import path from 'path'
+import AutoImport from "unplugin-auto-import/vite";
+// https://vite.dev/config/
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd())
+  console.log(env)
+  return {
+    plugins: [
+      vue(),
+      AutoImport({
+        imports: ["vue"],
+        dts: "src/auto-imports.d.ts", // 指定生成的类型声明文件路径
+        eslintrc: {
+          enabled: true, // 如果使用 ESLint，开启此选项
+          filepath: "./.eslintrc-auto-import.json",
+        },
+      }),
+      Components({
+        resolvers: [VantResolver()]
+      })
+    ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src')
+      }
+    },
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '')
+        }
       }
     }
   }

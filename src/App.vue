@@ -250,7 +250,12 @@ const sideMenuItems = computed(() => {
                   不要让知识在收藏夹里面吃灰，一起出来讨论呀~
                 </div>
               </a-card>
-              
+              <a-card title="微信小程序：前端的日常" class="mb-4">
+                <div class="font-bold">路过的大佬，麻烦关注一下,2025发大财</div>
+                <div class="mt-2">
+                    <img src="@/assets/qrcode.bmp" alt="">
+                  </div>
+              </a-card>
               <!-- 排行榜卡片 -->
               <!-- <a-card title="文章榜" class="mb-4">
                 <a-list item-layout="horizontal" :data-source="[1, 2, 3, 4, 5]">
