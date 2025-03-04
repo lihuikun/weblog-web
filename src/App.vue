@@ -1,8 +1,27 @@
 <script setup lang="ts">
-import { ref,computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { MenuFoldOutlined, MenuUnfoldOutlined, SearchOutlined, BellOutlined } from '@ant-design/icons-vue';
+import { BellOutlined, SmileOutlined } from '@ant-design/icons-vue';
+import { theme } from 'ant-design-vue';
+import { useThemeStore } from '@/stores/themeStore';
+import moonIcon from '@/assets/icons/moon.png'
+import sunIcon from '@/assets/icons/sun.png'
+const themeStore = useThemeStore();
 
+const themeConfig = computed(() => ({
+  algorithm: themeStore.isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+}));
+
+const toggleTheme = () => {
+  themeStore.toggleTheme();
+};
+watchEffect(() => {
+  if (themeStore.isDark) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+})
 // 控制移动端菜单显示
 const mobileMenuOpen = ref(false);
 
@@ -12,9 +31,9 @@ const toggleMobileMenu = () => {
 };
 
 // 当前选中的菜单项
-const selectedKeys = ref(['home']);
+const selectedKeys = ref([]);
 
-const sideMenuId= ref(['new'])
+const sideMenuId = ref(['new'])
 
 // 导航菜单项
 const navItems = [
@@ -32,17 +51,27 @@ const navItems = [
 
 // 拿到路由的侧边栏
 const route = useRoute()
-console.log("🚀 ~ router:", route)
- 
+
 const sideMenuItems = computed(() => {
-  if(!route.meta.menu) return 
+  if (!route.meta.menu) return
   sideMenuId.value = [(route.meta.menu as { key: string }[])?.[0].key]
   return route.meta.menu || []
 })
+
+watch(route, () => {
+  const currentPath = route.path;
+  const matchedItem = navItems.find(item => item.path === currentPath);
+
+  if (matchedItem) {
+    selectedKeys.value = [matchedItem.key];
+  } else {
+    selectedKeys.value = ['home']; // 默认选中首页
+  }
+}); 
 </script>
 
 <template>
-  <a-config-provider>
+  <a-config-provider :theme="themeConfig">
     <div class="min-h-screen flex flex-col bg-gray-50">
       <!-- 顶部导航栏 -->
       <a-layout-header class="bg-white shadow-sm p-0 sticky top-0 z-50 h-auto">
@@ -51,20 +80,16 @@ const sideMenuItems = computed(() => {
           <div class="flex items-center space-x-8">
             <!-- Logo -->
             <router-link to="/" class="flex items-center">
-              <a-avatar shape="square" :size="32" class="bg-blue-500 flex items-center justify-center">
+              <a-avatar shape="square" :size="32" class="flex items-center justify-center">
                 <template #icon>
                   <img src="@/assets/logo.jpg" alt="">
                 </template>
               </a-avatar>
-              <span class="ml-2 text-xl font-bold">前端的日常</span>
+              <span class="ml-4 text-xl font-bold text-white">前端的日常</span>
             </router-link>
-            
+
             <!-- 主导航 -->
-            <a-menu
-              mode="horizontal"
-              v-model:selectedKeys="selectedKeys"
-              class="border-0 bg-transparent"
-            >
+            <a-menu mode="horizontal" v-model:selectedKeys="selectedKeys" class="border-0 bg-transparent">
               <a-menu-item v-for="item in navItems" :key="item.key">
                 <router-link :to="item.path">
                   <span>{{ item.label }}</span>
@@ -73,7 +98,7 @@ const sideMenuItems = computed(() => {
               </a-menu-item>
             </a-menu>
           </div>
-          
+
           <!-- 搜索框和用户区域 -->
           <div class="flex items-center space-x-4">
             <!-- 搜索框 -->
@@ -87,7 +112,7 @@ const sideMenuItems = computed(() => {
                 <SearchOutlined />
               </template>
             </a-input-search> -->
-            
+
             <!-- 创作中心 -->
             <!-- <a-dropdown>
               <a-button type="primary" class="flex items-center">
@@ -106,14 +131,19 @@ const sideMenuItems = computed(() => {
                 </a-menu>
               </template>
             </a-dropdown> -->
-            
+
             <!-- 通知 -->
             <a-badge count="5">
               <a-button type="text" shape="circle">
-                <template #icon><BellOutlined /></template>
+                <template #icon>
+                  <BellOutlined />
+                </template>
               </a-button>
             </a-badge>
-            
+            <div @click="toggleTheme">
+              <img width="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
+            </div>
+
             <!-- 用户头像 -->
             <a-dropdown>
               <a-avatar src="https://picsum.photos/200" :size="36" />
@@ -129,7 +159,7 @@ const sideMenuItems = computed(() => {
             </a-dropdown>
           </div>
         </div>
-        
+
         <!-- 移动端导航 -->
         <div class="md:hidden flex items-center justify-between px-4 h-14">
           <!-- Logo和下拉菜单 -->
@@ -137,18 +167,19 @@ const sideMenuItems = computed(() => {
             <div class="flex items-center">
               <a-avatar shape="square" :size="28" class="bg-blue-500 flex items-center justify-center">
                 <template #icon>
-                  <svg viewBox="0 0 24 24" fill="currentColor" class="text-white">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                  </svg>
+                  <img src="@/assets/logo.jpg" alt="">
                 </template>
               </a-avatar>
               <span class="ml-1 text-lg font-bold">首页</span>
               <a-icon class="ml-1">
                 <svg viewBox="0 0 1024 1024" width="1em" height="1em" fill="currentColor">
-                  <path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path>
+                  <path
+                    d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z">
+                  </path>
                 </svg>
               </a-icon>
             </div>
+
             <template #overlay>
               <a-menu>
                 <a-menu-item v-for="item in navItems" :key="item.key">
@@ -157,7 +188,7 @@ const sideMenuItems = computed(() => {
               </a-menu>
             </template>
           </a-dropdown>
-          
+
           <!-- 搜索框 -->
           <!-- <a-input-search
             placeholder="探索"
@@ -169,22 +200,27 @@ const sideMenuItems = computed(() => {
               <SearchOutlined style="font-size: 14px" />
             </template>
           </a-input-search> -->
-          
+
           <!-- 用户头像 -->
-          <a-dropdown>
-            <a-avatar src="https://picsum.photos/200" :size="28" />
-            <template #overlay>
-              <a-menu>
-                <a-menu-item key="1">我的主页</a-menu-item>
-                <a-menu-item key="2">我的收藏</a-menu-item>
-                <a-menu-item key="3">我的设置</a-menu-item>
-                <a-menu-divider />
-                <a-menu-item key="4">退出登录</a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
+          <div class="flex items-center gap-3">
+            <div @click="toggleTheme">
+              <img width="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
+            </div>
+            <a-dropdown>
+              <a-avatar src="https://picsum.photos/200" :size="28" />
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="1">我的主页</a-menu-item>
+                  <a-menu-item key="2">我的收藏</a-menu-item>
+                  <a-menu-item key="3">我的设置</a-menu-item>
+                  <a-menu-divider />
+                  <a-menu-item key="4">退出登录</a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
         </div>
-        
+
         <!-- 移动端二级导航 -->
         <div class="md:hidden overflow-x-auto whitespace-nowrap px-4 py-2 border-t border-gray-100">
           <a-radio-group v-model:value="sideMenuId" button-style="solid" size="small">
@@ -194,24 +230,15 @@ const sideMenuItems = computed(() => {
           </a-radio-group>
         </div>
       </a-layout-header>
-      
+
       <!-- 主内容区 -->
       <a-layout class="container mx-auto px-4 py-6 bg-transparent">
         <a-layout class="bg-transparent">
           <!-- 左侧边栏 - 仅在大屏幕显示 -->
-          <a-layout-sider
-            class="hidden md:block bg-transparent"
-            width="200"
-            :style="{ background: 'transparent' }"
-            breakpoint="lg"
-            collapsed-width="0"
-          >
-            <a-menu
-              mode="inline"
-              v-model:selectedKeys="sideMenuId"
-              class="bg-white rounded-lg shadow-sm"
-              style="height: 100%"
-            >
+          <a-layout-sider class="hidden md:block bg-transparent" width="200" :style="{ background: 'transparent' }"
+            breakpoint="lg" collapsed-width="0">
+            <a-menu mode="inline" v-model:selectedKeys="sideMenuId" class="bg-white rounded-lg shadow-sm"
+              style="height: 100%">
               <a-menu-item v-for="item in sideMenuItems" :key="item.key">
                 <template #icon>
                   <a-icon>
@@ -222,25 +249,21 @@ const sideMenuItems = computed(() => {
               </a-menu-item>
             </a-menu>
           </a-layout-sider>
-          
+
           <!-- 内容区域 -->
           <a-layout-content class="bg-transparent px-6 bg-white">
-            <router-view />
+            <router-view :sideMenuId="sideMenuId" />
           </a-layout-content>
-          
+
           <!-- 右侧边栏 - 仅在大屏幕显示 -->
-          <a-layout-sider
-            class="hidden lg:block bg-transparent"
-            width="300"
-            :style="{ background: 'transparent' }"
-          >
+          <a-layout-sider class="hidden lg:block bg-transparent" width="300" :style="{ background: 'transparent' }">
             <div class="ml-6">
               <!-- 签到卡片 -->
               <a-card title="微信公众号：前端的日常" class="mb-4">
                 <div class="font-bold">路过的大佬，麻烦关注一下,2025发大财</div>
                 <div class="mt-2">
-                    <img src="@/assets/qrcode.png" alt="">
-                  </div>
+                  <img src="@/assets/qrcode.png" alt="">
+                </div>
               </a-card>
               <a-card class="mb-4" title="前端日常开发分享">
                 <div class="flex justify-between items-center">
@@ -253,8 +276,8 @@ const sideMenuItems = computed(() => {
               <a-card title="微信小程序：前端的日常" class="mb-4">
                 <div class="font-bold">路过的大佬，麻烦关注一下,2025发大财</div>
                 <div class="mt-2">
-                    <img src="@/assets/qrcode.bmp" alt="">
-                  </div>
+                  <img src="@/assets/qrcode.bmp" alt="">
+                </div>
               </a-card>
               <!-- 排行榜卡片 -->
               <!-- <a-card title="文章榜" class="mb-4">
@@ -274,7 +297,7 @@ const sideMenuItems = computed(() => {
                   <a-button type="link">查看更多</a-button>
                 </template>
               </a-card> -->
-              
+
               <!-- 作者榜卡片 -->
               <!-- <a-card title="作者榜">
                 <a-list item-layout="horizontal" :data-source="[1, 2, 3]">
@@ -317,7 +340,8 @@ const sideMenuItems = computed(() => {
   line-height: 1.5;
 }
 
-:deep(.ant-menu-item), :deep(.ant-menu-submenu) {
+:deep(.ant-menu-item),
+:deep(.ant-menu-submenu) {
   padding: 0 12px;
 }
 
@@ -337,10 +361,12 @@ const sideMenuItems = computed(() => {
 :deep(.ant-radio-group)::-webkit-scrollbar {
   display: none;
 }
+
 ::v-deep(.ant-layout-sider-children) {
-    height: auto;
+  height: auto;
 }
-:deep(.ant-card-body){
+
+:deep(.ant-card-body) {
   padding: 10px;
 }
 </style>
