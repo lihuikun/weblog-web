@@ -272,6 +272,8 @@ watch(route, () => {
                 <div class="flex justify-between items-center">
                   不要让知识在收藏夹里面吃灰，一起出来讨论呀~
                 </div>
+                <iframe class="w-full h-[70px]" src="https://flip-clock.lihk.top" frameborder="0"></iframe>
+
               </a-card>
               <a-card title="微信小程序：前端的日常" class="mb-4">
                 <div class="font-bold">路过的大佬，麻烦关注一下,2025发大财</div>
@@ -368,5 +370,11 @@ watch(route, () => {
 
 :deep(.ant-card-body) {
   padding: 10px;
+}
+:deep(.clock){
+  :deep(.flip){
+    width: 30px;
+    height: 40px;
+  }
 }
 </style>
