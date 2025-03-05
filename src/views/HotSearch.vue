@@ -55,7 +55,7 @@ function getRankColor(index) {
 }
 watchEffect(() => {
   if (sideMenuId) {
-    getList({ source: sideMenuId })
+    getList({ source: sideMenuId[0] })
   }
 })
 </script>
