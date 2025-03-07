@@ -70,7 +70,7 @@ watchEffect(() => {
       </div>
 
       <div v-else>
-        <a-list :data-source="tableList" item-layout="vertical" size="large">
+        <a-list :data-source="tableList" item-layout="vertical" size="large" class="xs:p-[1px]">
           <template #renderItem="{ item, index }">
             <a-list-item :key="item.id">
               <div class="flex items-center justify-between">

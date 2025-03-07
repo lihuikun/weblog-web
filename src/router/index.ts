@@ -1,5 +1,9 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
-
+export interface Menu {
+  key: string;
+  label: string;
+  icon: string;
+}
 // 路由配置
 const routes: Array<RouteRecordRaw> = [
   {

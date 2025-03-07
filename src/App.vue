@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { BellOutlined, SmileOutlined } from '@ant-design/icons-vue';
+import { BellOutlined, CaretDownOutlined } from '@ant-design/icons-vue';
 import { theme } from 'ant-design-vue';
 import { useThemeStore } from '@/stores/themeStore';
 import moonIcon from '@/assets/icons/moon.png'
 import sunIcon from '@/assets/icons/sun.png'
+import { Menu } from '@/router/index';
 const themeStore = useThemeStore();
 
 const themeConfig = computed(() => ({
@@ -52,10 +53,10 @@ const navItems = [
 // 拿到路由的侧边栏
 const route = useRoute()
 
-const sideMenuItems = computed(() => {
+const sideMenuItems= computed(() => {
   if (!route.meta.menu) return
   sideMenuId.value = [(route.meta.menu as { key: string }[])?.[0].key]
-  return route.meta.menu || []
+  return route.meta.menu|| []
 })
 
 watch(route, () => {
@@ -170,14 +171,8 @@ watch(route, () => {
                   <img src="@/assets/logo.jpg" alt="">
                 </template>
               </a-avatar>
-              <span class="ml-1 text-lg font-bold">首页</span>
-              <a-icon class="ml-1">
-                <svg viewBox="0 0 1024 1024" width="1em" height="1em" fill="currentColor">
-                  <path
-                    d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z">
-                  </path>
-                </svg>
-              </a-icon>
+              <span class="ml-3 text-lg font-bold text-white">首页</span>
+              <CaretDownOutlined class="ml-1 text-white" />
             </div>
 
             <template #overlay>
@@ -223,8 +218,8 @@ watch(route, () => {
 
         <!-- 移动端二级导航 -->
         <div class="md:hidden overflow-x-auto whitespace-nowrap px-4 py-2 border-t border-gray-100">
-          <a-radio-group v-model:value="sideMenuId" button-style="solid" size="small">
-            <a-radio-button v-for="item in sideMenuItems" :key="item.key" :value="item.key">
+          <a-radio-group v-model:value="sideMenuId[0]" button-style="solid" size="small">
+            <a-radio-button v-for="item in (sideMenuItems as Menu[])" :key="item.key" :value="item.key">
               {{ item.label }}
             </a-radio-button>
           </a-radio-group>
@@ -239,7 +234,7 @@ watch(route, () => {
             breakpoint="lg" collapsed-width="0">
             <a-menu mode="inline" v-model:selectedKeys="sideMenuId" class="bg-white rounded-lg shadow-sm"
               style="height: 100%">
-              <a-menu-item v-for="item in sideMenuItems" :key="item.key">
+              <a-menu-item v-for="item in (sideMenuItems as Menu[])" :key="item.key">
                 <template #icon>
                   <a-icon>
                     <component :is="item.icon" />
@@ -251,7 +246,7 @@ watch(route, () => {
           </a-layout-sider>
 
           <!-- 内容区域 -->
-          <a-layout-content class="bg-transparent px-6 bg-white">
+          <a-layout-content class="bg-transparent px-6 bg-white xs:px-0">
             <router-view :sideMenuId="sideMenuId" />
           </a-layout-content>
 
@@ -273,7 +268,12 @@ watch(route, () => {
                   不要让知识在收藏夹里面吃灰，一起出来讨论呀~
                 </div>
                 <iframe class="w-full h-[70px]" src="https://flip-clock.lihk.top" frameborder="0"></iframe>
-
+              </a-card>
+              <a-card title="网站PV" class="mb-4">
+                <div class="font-bold">路过的大佬，麻烦关注一下,2025发大财</div>
+                <div class="mt-2">
+                  <img src="@/assets/qrcode.png" alt="">
+                </div>
               </a-card>
               <a-card title="微信小程序：前端的日常" class="mb-4">
                 <div class="font-bold">路过的大佬，麻烦关注一下,2025发大财</div>
@@ -371,8 +371,9 @@ watch(route, () => {
 :deep(.ant-card-body) {
   padding: 10px;
 }
-:deep(.clock){
-  :deep(.flip){
+
+:deep(.clock) {
+  :deep(.flip) {
     width: 30px;
     height: 40px;
   }
