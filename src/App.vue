@@ -7,6 +7,7 @@ import { useThemeStore } from '@/stores/themeStore';
 import moonIcon from '@/assets/icons/moon.png'
 import sunIcon from '@/assets/icons/sun.png'
 import { Menu } from '@/router/index';
+import { getPV,PV } from '@/api/pv';
 const themeStore = useThemeStore();
 
 const themeConfig = computed(() => ({
@@ -53,12 +54,19 @@ const navItems = [
 // 拿到路由的侧边栏
 const route = useRoute()
 
-const sideMenuItems= computed(() => {
+const sideMenuItems = computed(() => {
   if (!route.meta.menu) return
   sideMenuId.value = [(route.meta.menu as { key: string }[])?.[0].key]
-  return route.meta.menu|| []
+  return route.meta.menu || []
 })
-
+const PVTotal = ref<PV>({
+  todayPv: 0,
+  totalPv: 0,
+})
+async function getPVTotal() {
+  const { data } = await getPV()
+  PVTotal.value = data
+}
 watch(route, () => {
   const currentPath = route.path;
   const matchedItem = navItems.find(item => item.path === currentPath);
@@ -68,7 +76,10 @@ watch(route, () => {
   } else {
     selectedKeys.value = ['home']; // 默认选中首页
   }
-}); 
+});
+onMounted(() => {
+  getPVTotal()
+})
 </script>
 
 <template>
@@ -246,7 +257,7 @@ watch(route, () => {
           </a-layout-sider>
 
           <!-- 内容区域 -->
-          <a-layout-content class="bg-transparent px-6 bg-white xs:px-0">
+          <a-layout-content class="px-6 bg-white xs:px-0">
             <router-view :sideMenuId="sideMenuId" />
           </a-layout-content>
 
@@ -270,9 +281,15 @@ watch(route, () => {
                 <iframe class="w-full h-[70px]" src="https://flip-clock.lihk.top" frameborder="0"></iframe>
               </a-card>
               <a-card title="网站PV" class="mb-4">
-                <div class="font-bold">路过的大佬，麻烦关注一下,2025发大财</div>
-                <div class="mt-2">
-                  <img src="@/assets/qrcode.png" alt="">
+                <div class="flex">
+                  <div class="flex-1 flex flex-col items-center">
+                    <div class="font-bold">今日 PV</div>
+                    <div>{{ PVTotal.todayPv }}</div>
+                  </div>
+                  <div class="flex-1 flex flex-col items-center">
+                    <div class="font-bold">总 PV</div>
+                    <div>{{ PVTotal.totalPv }}</div>
+                  </div>
                 </div>
               </a-card>
               <a-card title="微信小程序：前端的日常" class="mb-4">
