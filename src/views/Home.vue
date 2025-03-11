@@ -22,12 +22,12 @@ const params = ref({
   pageSize: 10,
   categoryId: 1
 })
-const fetchPosts = async () => {
+const getList = async (categoryId) => {
   try {
     loading.value = true;
-    const { data } = await getArticles(params.value);
+    const { data } = await getArticles({ ...params.value, categoryId });
     tableData.value = data.rows
-    console.log("🚀 ~ fetchPosts ~ data:", data)
+    console.log("🚀 ~ getList ~ data:", data)
   } catch (err) {
     error.value = '获取数据失败';
     console.error(err);
@@ -35,9 +35,14 @@ const fetchPosts = async () => {
     loading.value = false;
   }
 };
-
+const { sideMenuId } = defineProps<{ sideMenuId: string }>();
+watchEffect(() => {
+  if (sideMenuId) {
+    getList(sideMenuId[0])
+  }
+})
 onMounted(() => {
-  fetchPosts();
+  getList(0);
 });
 </script>
 
@@ -78,18 +83,17 @@ onMounted(() => {
 
                 <div class="flex items-center space-x-4 text-gray-500">
                   <div class="flex gap-1">
-                    <Like :style="{ color: 'red', fontSize: '20px' }" />
+                    <Like :style="{ color: '#cdcdcd', fontSize: '20px' }" />
                     {{ item.likeCount }}
                   </div>
                   <div class="flex gap-1">
-                    <View :style="{ color: 'red', fontSize: '20px' }" />
+                    <View :style="{ color: '#cdcdcd', fontSize: '20px' }" />
                     {{ item.viewCount }}
                   </div>
                 </div>
               </div>
               <template #extra v-if="item.coverImage">
-                <img width="272" alt="cover" :src="item.coverImage"
-                  class="rounded-lg object-cover h-32" />
+                <img width="272" alt="cover" :src="item.coverImage" class="rounded-lg object-cover h-32" />
               </template>
             </a-list-item>
           </template>

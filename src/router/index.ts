@@ -14,12 +14,12 @@ const routes: Array<RouteRecordRaw> = [
       title: '首页',
       keepAlive: true,
       menu:[
-        { key: 'new', label: '最新文章', icon: 'user-outlined' },
-        { key: 'comprehensive', label: 'Vue', icon: 'appstore-outlined' },
-        { key: 'ranking', label: 'NestJs', icon: 'trophy-outlined' },
-        { key: 'backend', label: '前端', icon: 'database-outlined' },
-        { key: 'frontend', label: '微信小程序', icon: 'code-outlined' },
-        { key: 'android', label: 'Node', icon: 'android-outlined' },
+        { key: '0', label: '最新文章', icon: 'user-outlined' },
+        { key: '1', label: 'Vue', icon: 'appstore-outlined' },
+        { key: '2', label: 'NestJs', icon: 'trophy-outlined' },
+        { key: '3', label: '前端', icon: 'database-outlined' },
+        { key: '4', label: '微信小程序', icon: 'code-outlined' },
+        { key: '5', label: 'Node', icon: 'android-outlined' },
       ]
     },
   },

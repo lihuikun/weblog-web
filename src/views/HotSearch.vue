@@ -53,6 +53,9 @@ function getRankColor(index) {
       return ""; // 其他项默认颜色
   }
 }
+function toDetail(item) {
+  window.open(item.url)
+}
 watchEffect(() => {
   if (sideMenuId) {
     getList({ source: sideMenuId[0] })
@@ -76,7 +79,7 @@ watchEffect(() => {
               <div class="flex items-center justify-between">
                 <div class="text-xl font-bold flex">
                   <div class="mr-2 text-gray-500 w-[25px]" :class="getRankColor(index)">{{ index + 1 }}</div>
-                  <a class="hover:text-blue-500">{{ item.word }}</a>
+                  <a class="hover:text-blue-500" @click="toDetail(item)">{{ item.word }}</a>
                 </div>
                 <span class=" text-gray-500 min-w-[80px] ml-[20px]">
                   热度: {{ formatHotValue(item.hot_value) }}

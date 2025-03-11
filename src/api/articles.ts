@@ -5,5 +5,5 @@ export interface Articles {
   total: number;
 }
 export const getArticles = (params): Promise<ApiResponse<Articles>> => {
-  return request.get('/articles',{params})
+  return request.get('/articles', { params })
 }
