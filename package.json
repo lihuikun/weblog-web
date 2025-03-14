@@ -18,6 +18,9 @@
     "vue": "^3.4.38",
     "vue-router": "^4.3.0"
   },
+  "browser": {
+    "crypto": false
+  },
   "devDependencies": {
     "@types/node": "^22.13.9",
     "@vitejs/plugin-vue": "^5.1.3",
