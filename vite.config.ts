@@ -5,7 +5,8 @@ import { VantResolver } from 'unplugin-vue-components/resolvers'
 import path from 'path'
 import AutoImport from "unplugin-auto-import/vite";
 import svgLoader from "vite-svg-loader";
-// https://vite.dev/config/
+import { terser } from 'rollup-plugin-terser';
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
   console.log(env)
@@ -38,6 +39,17 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api/, '')
         }
       }
-    }
+    },
+    build: {
+      rollupOptions: {
+        plugins: [
+          terser({
+            compress: {
+              drop_console: true, // 移除 console.log
+            },
+          }),
+        ],
+      },
+    },
   }
 })
