@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js';
+import * as CryptoJS from 'crypto-js';
 
 // 从环境变量中获取密钥，或者使用默认值
 const secretKey = import.meta.env.VITE_CRYPTO_KEY;
