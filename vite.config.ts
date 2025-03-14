@@ -38,11 +38,6 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api/, '')
         }
       }
-    },
-    build: {
-      rollupOptions: {
-        external: ['crypto-js'], // 将 crypto-js 添加到外部依赖
-      },
     }
   }
 })
