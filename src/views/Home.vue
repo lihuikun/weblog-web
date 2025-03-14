@@ -16,17 +16,21 @@ interface Post {
 }
 const loading = ref(true);
 const error = ref<string | null>(null);
-const tableData = ref([])
+const tableData = ref<Post[]>([])
 const params = ref({
   page: 1,
   pageSize: 10,
   categoryId: 1
 })
-const getList = async (categoryId) => {
+const getList = async (categoryId: string | number) => {
   try {
     loading.value = true;
     const { data } = await getArticles({ ...params.value, categoryId });
-    tableData.value = data.rows
+    if (data) {
+      tableData.value = data.rows;
+    } else {
+      error.value = '数据未定义';
+    }
     console.log("🚀 ~ getList ~ data:", data)
   } catch (err) {
     error.value = '获取数据失败';
