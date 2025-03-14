@@ -1,5 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { decryptData } from './decrypt';
 
+
+const encryptionKey = import.meta.env.VITE_CRYPTO_KEY || '';
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: '/api',
@@ -29,26 +32,27 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data;
-    
+
     // 根据自定义错误码处理错误
     if (res.code && res.code !== 200) {
       console.error('Response error:', res.message || 'Error');
-      
+
       // 401: 未登录或 token 过期
       if (res.code === 401) {
         // 可以在这里处理登出逻辑
         // store.dispatch('user/logout');
         // router.push('/login');
       }
-      
+
       return Promise.reject(new Error(res.message || 'Error'));
     }
-    
+    encryptionKey && (res.data = decryptData(res.data))
+    console.log("🚀 ~ res.data:", res.data)
     return res;
   },
   (error) => {
     console.error('Response error:', error);
-    
+
     // 处理 HTTP 状态码错误
     if (error.response) {
       switch (error.response.status) {
@@ -67,7 +71,7 @@ service.interceptors.response.use(
           break;
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
