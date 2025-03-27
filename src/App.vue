@@ -7,7 +7,7 @@ import { useThemeStore } from '@/stores/themeStore';
 import moonIcon from '@/assets/icons/moon.png'
 import sunIcon from '@/assets/icons/sun.png'
 import { Menu } from '@/router/index';
-import { getPV,PV } from '@/api/pv';
+import { getPV, PV } from '@/api/pv';
 const themeStore = useThemeStore();
 
 const themeConfig = computed(() => ({
@@ -41,7 +41,7 @@ const sideMenuId = ref(['new'])
 const navItems = [
   { key: 'home', label: '首页', path: '/' },
   { key: 'hot-search', label: '热搜榜', path: '/hot-search' },
-  // { key: 'hot', label: '沸点', path: '/hot' },
+  { key: 'game', label: '摸鱼小游戏', path: '/game' },
   // { key: 'course', label: '课程', path: '/course' },
   // { key: 'live', label: '直播', path: '/live' },
   // { key: 'activity', label: '活动', path: '/activity' },
@@ -84,15 +84,15 @@ onMounted(() => {
 
 <template>
   <a-config-provider :theme="themeConfig">
-    <div class="min-h-screen flex flex-col bg-gray-50">
+    <div class="flex flex-col min-h-screen bg-gray-50">
       <!-- 顶部导航栏 -->
-      <a-layout-header class="bg-white shadow-sm p-0 sticky top-0 z-50 h-auto">
+      <a-layout-header class="sticky top-0 z-50 p-0 h-auto bg-white shadow-sm">
         <!-- 大屏幕导航 -->
-        <div class="container mx-auto px-4 hidden md:flex items-center justify-between h-16">
+        <div class="container hidden justify-between items-center px-4 mx-auto h-16 md:flex">
           <div class="flex items-center space-x-8">
             <!-- Logo -->
             <router-link to="/" class="flex items-center">
-              <a-avatar shape="square" :size="32" class="flex items-center justify-center">
+              <a-avatar shape="square" :size="32" class="flex justify-center items-center">
                 <template #icon>
                   <img src="@/assets/logo.jpg" alt="">
                 </template>
@@ -101,11 +101,11 @@ onMounted(() => {
             </router-link>
 
             <!-- 主导航 -->
-            <a-menu mode="horizontal" v-model:selectedKeys="selectedKeys" class="border-0 bg-transparent">
+            <a-menu mode="horizontal" v-model:selectedKeys="selectedKeys" class="bg-transparent border-0">
               <a-menu-item v-for="item in navItems" :key="item.key">
                 <router-link :to="item.path">
                   <span>{{ item.label }}</span>
-                  <a-badge v-if="item.isNew" dot class="ml-1 absolute -top-1 -right-1" color="#f5222d" />
+                  <a-badge v-if="item.isNew" dot class="absolute -top-1 -right-1 ml-1" color="#f5222d" />
                 </router-link>
               </a-menu-item>
             </a-menu>
@@ -173,11 +173,11 @@ onMounted(() => {
         </div>
 
         <!-- 移动端导航 -->
-        <div class="md:hidden flex items-center justify-between px-4 h-14">
+        <div class="flex justify-between items-center px-4 h-14 md:hidden">
           <!-- Logo和下拉菜单 -->
           <a-dropdown>
             <div class="flex items-center">
-              <a-avatar shape="square" :size="28" class="bg-blue-500 flex items-center justify-center">
+              <a-avatar shape="square" :size="28" class="flex justify-center items-center bg-blue-500">
                 <template #icon>
                   <img src="@/assets/logo.jpg" alt="">
                 </template>
@@ -198,7 +198,7 @@ onMounted(() => {
           <!-- 搜索框 -->
           <!-- <a-input-search
             placeholder="探索"
-            class="mx-2 flex-1"
+            class="flex-1 mx-2"
             :bordered="true"
             size="small"
           >
@@ -208,7 +208,7 @@ onMounted(() => {
           </a-input-search> -->
 
           <!-- 用户头像 -->
-          <div class="flex items-center gap-3">
+          <div class="flex gap-3 items-center">
             <div @click="toggleTheme">
               <img width="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
             </div>
@@ -228,7 +228,7 @@ onMounted(() => {
         </div>
 
         <!-- 移动端二级导航 -->
-        <div class="md:hidden overflow-x-auto whitespace-nowrap px-4 py-2 border-t border-gray-100">
+        <div class="overflow-x-auto px-4 py-2 whitespace-nowrap border-t border-gray-100 md:hidden">
           <a-radio-group v-model:value="sideMenuId[0]" button-style="solid" size="small">
             <a-radio-button v-for="item in (sideMenuItems as Menu[])" :key="item.key" :value="item.key">
               {{ item.label }}
@@ -238,10 +238,10 @@ onMounted(() => {
       </a-layout-header>
 
       <!-- 主内容区 -->
-      <a-layout class="container mx-auto px-4 py-6 bg-transparent">
+      <a-layout class="container px-4 py-6 mx-auto bg-transparent">
         <a-layout class="bg-transparent">
           <!-- 左侧边栏 - 仅在大屏幕显示 -->
-          <a-layout-sider class="hidden md:block bg-transparent" width="200" :style="{ background: 'transparent' }"
+          <a-layout-sider class="hidden bg-transparent md:block" width="200" :style="{ background: 'transparent' }"
             breakpoint="lg" collapsed-width="0">
             <a-menu mode="inline" v-model:selectedKeys="sideMenuId" class="bg-white rounded-lg shadow-sm"
               style="height: 100%">
@@ -262,7 +262,7 @@ onMounted(() => {
           </a-layout-content>
 
           <!-- 右侧边栏 - 仅在大屏幕显示 -->
-          <a-layout-sider class="hidden lg:block bg-transparent" width="300" :style="{ background: 'transparent' }">
+          <a-layout-sider class="hidden bg-transparent lg:block" width="300" :style="{ background: 'transparent' }">
             <div class="ml-6">
               <!-- 签到卡片 -->
               <a-card title="微信公众号：前端的日常" class="mb-4">
@@ -282,11 +282,11 @@ onMounted(() => {
               </a-card>
               <a-card title="网站PV" class="mb-4">
                 <div class="flex">
-                  <div class="flex-1 flex flex-col items-center">
+                  <div class="flex flex-col flex-1 items-center">
                     <div class="font-bold">今日 PV</div>
                     <div>{{ PVTotal.todayPv }}</div>
                   </div>
-                  <div class="flex-1 flex flex-col items-center">
+                  <div class="flex flex-col flex-1 items-center">
                     <div class="font-bold">总 PV</div>
                     <div>{{ PVTotal.totalPv }}</div>
                   </div>
@@ -304,7 +304,7 @@ onMounted(() => {
                   <template #renderItem="{ item }">
                     <a-list-item>
                       <div class="flex items-start">
-                        <div class="text-blue-500 font-medium mr-2">{{ item }}</div>
+                        <div class="mr-2 font-medium text-blue-500">{{ item }}</div>
                         <div class="flex-1">
                           <div class="font-medium">AI 插件第二弹，更强更好用</div>
                         </div>
