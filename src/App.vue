@@ -83,7 +83,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <a-config-provider :theme="themeConfig" prefix-cls="hk">
+  <a-config-provider :theme="themeConfig">
     <div class="flex flex-col min-h-screen bg-gray-50">
       <!-- 顶部导航栏 -->
       <a-layout-header class="sticky top-0 z-50 p-0 h-auto bg-white shadow-sm">
