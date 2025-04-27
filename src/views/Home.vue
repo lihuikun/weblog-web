@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue';
 import { getArticles } from '@/api/articles';
 import Like from '@/assets/icons/like.svg';
 import View from '@/assets/icons/view.svg';
+import Editor from '@/views/Editor.vue';
+
 interface Post {
   id: number;
   title: string;
@@ -40,6 +42,26 @@ const getList = async (categoryId: string | number) => {
   }
 };
 const { sideMenuId } = defineProps<{ sideMenuId: string }>();
+const visible = ref(false)
+const article = ref({
+  title: '',
+  content: '',
+  categoryId: '',
+  coverImage: ''
+})
+const isPreview = ref(false)
+const handleEdit = (item: any) => {
+  visible.value = true
+  article.value = item
+  isPreview.value = false
+  console.log("🚀 ~ handleEdit ~ article.value:", article.value)
+}
+const handlePreview = (item: any) => {
+  visible.value = true
+  article.value = item
+  isPreview.value = true
+  console.log("🚀 ~ handlePreview ~ article.value:", article.value)
+}
 watchEffect(() => {
   if (sideMenuId) {
     getList(sideMenuId[0])
@@ -66,21 +88,21 @@ onMounted(() => {
       <div v-else>
         <a-list :data-source="tableData" item-layout="vertical" size="large">
           <template #renderItem="{ item }">
-            <a-list-item :key="item.id">
+            <a-list-item :key="item.id" @click="handlePreview(item)">
               <a-list-item-meta>
                 <template #title>
                   <a class="text-xl font-bold hover:text-blue-500">{{ item.title }}</a>
                 </template>
                 <template #description>
-                  <div class="flex items-center text-sm text-gray-500">
+                  <div class="flex items-center text-sm text-gray-500 line-clamp-2">
                     <span class="mx-1">{{ item.content }}</span>
                   </div>
                 </template>
               </a-list-item-meta>
 
-              <div class="text-gray-600 my-2 line-clamp-2">{{ item.body }}</div>
+              <div class="my-2 text-gray-600 line-clamp-2">{{ item.body }}</div>
 
-              <div class="flex items-center justify-between mt-2">
+              <div class="flex justify-between items-center mt-2">
                 <div class="flex space-x-2">
                   <a-tag v-for="tag in item.tags" :key="tag" color="blue">{{ tag }}</a-tag>
                 </div>
@@ -97,19 +119,24 @@ onMounted(() => {
                 </div>
               </div>
               <template #extra v-if="item.coverImage">
-                <img width="272" alt="cover" :src="item.coverImage" class="rounded-lg object-cover h-32" />
+                <img width="272" alt="cover" :src="item.coverImage" class="object-cover h-32 rounded-lg" />
               </template>
+              <!-- <div>
+                <AButton type="primary" @click.stop="handleEdit(item)">编辑文章</AButton>
+              </div> -->
             </a-list-item>
           </template>
         </a-list>
       </div>
     </a-spin>
+    <Editor v-model:visible="visible" v-model:article="article" v-model:isPreview="isPreview" />
   </div>
 </template>
 
 <style scoped>
 /* 文本截断 */
 .line-clamp-2 {
+  /* 超出两行显示省略号 */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

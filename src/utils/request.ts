@@ -3,6 +3,7 @@ import { decryptData } from './decrypt';
 
 
 const encryptionKey = import.meta.env.VITE_CRYPTO_KEY || '';
+console.log("🚀 ~ import.meta.env:", import.meta.env)
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: '/api',

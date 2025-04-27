@@ -20,6 +20,7 @@ const routes: Array<RouteRecordRaw> = [
         { key: '3', label: '前端', icon: 'database-outlined' },
         { key: '4', label: '微信小程序', icon: 'code-outlined' },
         { key: '5', label: 'Node', icon: 'android-outlined' },
+        { key: '6', label: '本站搭建', icon: 'android-outlined' },
       ]
     },
   },
