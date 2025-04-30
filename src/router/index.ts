@@ -1,11 +1,15 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import publicRoutes from './public-routes';
+import { message } from 'ant-design-vue';
+
 export interface Menu {
   key: string;
   label: string;
   icon: string;
 }
-// 路由配置
-const routes: Array<RouteRecordRaw> = [
+
+// 需要主布局的路由配置
+const mainRoutes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
@@ -13,6 +17,8 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: '首页',
       keepAlive: true,
+      requiresAuth: true,
+      layout: 'default',
       menu: [
         { key: '0', label: '最新文章', icon: 'user-outlined' },
         { key: '1', label: 'Vue', icon: 'appstore-outlined' },
@@ -31,6 +37,8 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: '热搜',
       keepAlive: true,
+      requiresAuth: true,
+      layout: 'default',
       menu: [
         { key: 'juejin', label: '稀土掘金', icon: 'user-outlined' },
         { key: 'toutiao', label: '今日头条', icon: 'appstore-outlined' },
@@ -46,6 +54,8 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: '摸鱼小游戏',
       keepAlive: true,
+      requiresAuth: true,
+      layout: 'default',
       menu: [
         { key: 'jump', label: '跳一跳', url: 'https://haiyong.site/moyu/tyt/' },
         { key: 'car', label: '汽车', url: 'https://haiyong.site/moyu/slowroads/' },
@@ -60,18 +70,27 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       title: '关于',
       keepAlive: true,
-    },
-  },
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('../views/NotFound.vue'),
-    meta: {
-      title: '404',
-      keepAlive: true,
+      requiresAuth: true,
+      layout: 'default',
     },
   },
 ];
+
+// 404路由
+const notFoundRoute: RouteRecordRaw = {
+  path: '/:pathMatch(.*)*',
+  name: 'NotFound',
+  component: () => import('../views/NotFound.vue'),
+  meta: {
+    title: '404',
+    keepAlive: true,
+    requiresAuth: false,
+    layout: 'blank',
+  },
+};
+
+// 合并所有路由
+const routes = [...publicRoutes, ...mainRoutes, notFoundRoute];
 
 // 创建路由实例
 const router = createRouter({
@@ -84,14 +103,18 @@ router.beforeEach((to, from, next) => {
   // 设置页面标题
   document.title = `${to.meta.title as string || '默认标题'} - Vue3 App`;
 
-  // 这里可以添加权限验证等逻辑
-  // const token = localStorage.getItem('token');
-  // if (to.meta.requiresAuth && !token) {
-  //   next('/login');
-  // } else {
-  //   next();
-  // }
-
+  // 判断是否需要登录权限
+  if (to.meta.requiresAuth) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // message.warning('请先登录');
+      // next({
+      //   path: '/login',
+      //   query: { redirect: to.fullPath } // 保存要跳转的路由
+      // });
+      // return;
+    }
+  }
   next();
 });
 

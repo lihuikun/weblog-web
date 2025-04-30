@@ -42,7 +42,7 @@ const getList = async (categoryId: number | string) => {
     loading.value = false;
   }
 };
-const { sideMenuId } = defineProps<{ sideMenuId: string }>();
+const { sideMenuId } = defineProps<{ sideMenuId: string[] }>();
 const visible = ref(false)
 const article = ref({
   title: '',

@@ -5,8 +5,9 @@ const route = useRoute()
 const router = useRouter()
 const { sideMenuId } = defineProps<{ sideMenuId: string }>();
 const currentGameUrl = computed(() => {
-  console.log('route.params.key', route)
-  return route.meta.menu.find(item => item.key === sideMenuId[0])?.url
+  console.log('route.params.key', route, sideMenuId)
+  const menu = (route.meta.menu as { key: string; url: string }[])
+  return menu.find((item: { key: string }) => item.key === sideMenuId[0])?.url
 })
 console.log("🚀 ~ currentGame ~ currentGame:", currentGameUrl.value, sideMenuId)
 
