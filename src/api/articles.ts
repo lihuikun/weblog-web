@@ -8,7 +8,13 @@ export interface Categories {
   rows: any[];
   total: number;
 }
-export const getArticles = (params): Promise<ApiResponse<Articles>> => {
+export interface Article {
+  id?: number | string
+  categoryId: number | string
+  page?: number
+  pageSize?: number
+}
+export const getArticles = (params: Article): Promise<ApiResponse<Articles>> => {
   return request.get('/articles', { params })
 }
 

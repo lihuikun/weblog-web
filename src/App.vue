@@ -8,6 +8,7 @@ import moonIcon from '@/assets/icons/moon.png'
 import sunIcon from '@/assets/icons/sun.png'
 import { Menu } from '@/router/index';
 import { getPV, PV } from '@/api/pv';
+import logo from '@/assets/logo.jpg';
 const themeStore = useThemeStore();
 
 const themeConfig = computed(() => ({
@@ -158,7 +159,7 @@ onMounted(() => {
 
             <!-- 用户头像 -->
             <a-dropdown>
-              <a-avatar src="https://picsum.photos/200" :size="36" />
+              <a-avatar src="@/assets/logo.jpg" :size="36" />
               <template #overlay>
                 <a-menu>
                   <a-menu-item key="1">我的主页</a-menu-item>
@@ -179,7 +180,7 @@ onMounted(() => {
             <div class="flex items-center">
               <a-avatar shape="square" :size="28" class="flex justify-center items-center bg-blue-500">
                 <template #icon>
-                  <img src="@/assets/logo.jpg" alt="">
+                  <img :src="logo" alt="">
                 </template>
               </a-avatar>
               <span class="ml-3 text-lg font-bold text-white">首页</span>
@@ -213,7 +214,7 @@ onMounted(() => {
               <img width="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
             </div>
             <a-dropdown>
-              <a-avatar src="https://picsum.photos/200" :size="28" />
+              <a-avatar :src="logo" :size="28" />
               <template #overlay>
                 <a-menu>
                   <a-menu-item key="1">我的主页</a-menu-item>

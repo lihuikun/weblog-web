@@ -4,6 +4,7 @@ import { getArticles } from '@/api/articles';
 import Like from '@/assets/icons/like.svg';
 import View from '@/assets/icons/view.svg';
 import Editor from '@/views/Editor.vue';
+import { vMarkdown } from '@/directives/markdown'
 
 interface Post {
   id: number;
@@ -24,7 +25,7 @@ const params = ref({
   pageSize: 10,
   categoryId: 1
 })
-const getList = async (categoryId: string | number) => {
+const getList = async (categoryId: number | string) => {
   try {
     loading.value = true;
     const { data } = await getArticles({ ...params.value, categoryId });
@@ -47,7 +48,8 @@ const article = ref({
   title: '',
   content: '',
   categoryId: '',
-  coverImage: ''
+  coverImage: '',
+  id: ''
 })
 const isPreview = ref(false)
 const handleEdit = (item: any) => {
@@ -70,6 +72,10 @@ watchEffect(() => {
 onMounted(() => {
   getList(0);
 });
+
+const directives = {
+  markdown: vMarkdown
+}
 </script>
 
 <template>
@@ -95,7 +101,7 @@ onMounted(() => {
                 </template>
                 <template #description>
                   <div class="flex items-center text-sm text-gray-500 line-clamp-2">
-                    <span class="mx-1">{{ item.content }}</span>
+                    <span class="mx-1" v-markdown>{{ item.content }}</span>
                   </div>
                 </template>
               </a-list-item-meta>

@@ -45,7 +45,7 @@ import 'md-editor-v3/lib/style.css';
 import 'md-editor-v3/lib/preview.css';
 import { createArticle, updateArticle, deleteArticle } from '@/api/articles'
 import { onBeforeUnmount, ref, shallowRef, onMounted } from 'vue'
-import { Modal } from 'ant-design-vue';
+import { Modal, message } from 'ant-design-vue';
 interface Article {
     title: string
     content: string
@@ -53,14 +53,22 @@ interface Article {
     coverImage: string
     id: string
 }
-const { isPreview } = defineProps<{ isPreview: boolean }>()
 const editorRef = shallowRef()
 const emit = defineEmits<{
     (e: 'update:visible', visible: boolean): void
     (e: 'update:article', article: Article): void
 }>()
-const visible = defineModel<boolean>('visible')
-const article = defineModel<Article>('article')
+const visible = defineModel<boolean>('visible', { required: true })
+const article = defineModel<Article>('article', {
+    default: () => ({
+        title: '',
+        content: '',
+        categoryId: '',
+        coverImage: '',
+        id: ''
+    })
+})
+const { isPreview } = defineProps<{ isPreview: boolean }>()
 console.log("🚀 ~ article:", article)
 const categories = ref([
     { key: 0, label: '最新文章', icon: 'user-outlined' },
@@ -76,6 +84,7 @@ async function handleUpdate() {
     const res = await updateArticle(article.value)
     if (res.code === 200) {
         message.success('更新成功')
+        visible.value = false
     } else {
         message.error('更新失败')
     }
@@ -90,6 +99,7 @@ function handleDelete() {
             const res = await deleteArticle(article.value.id)
             if (res.code === 200) {
                 message.success('删除成功')
+                visible.value = false
             } else {
                 message.error('删除失败')
             }
