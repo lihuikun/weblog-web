@@ -12,13 +12,14 @@ const loading = ref(false);
 const isLogin = ref(true);
 
 const formState = reactive<FormState>({
-    username: '',
+    email: '',
+    nickname: '',
     password: '',
     remember: true,
 });
 
 const registerFormState = reactive<RegisterFormState>({
-    username: '',
+    nickname: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -26,9 +27,9 @@ const registerFormState = reactive<RegisterFormState>({
 });
 
 const loginRules = {
-    username: [
-        { required: true, message: '请输入用户名', trigger: 'blur' },
-        { min: 4, message: '用户名至少4个字符', trigger: 'blur' },
+    email: [
+        { required: true, message: '请输入邮箱', trigger: 'blur' },
+        { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' },
     ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
@@ -37,7 +38,7 @@ const loginRules = {
 };
 
 const registerRules = {
-    username: [
+    nickname: [
         { required: true, message: '请输入用户名', trigger: 'blur' },
         { min: 4, message: '用户名至少4个字符', trigger: 'blur' },
     ],
@@ -75,15 +76,13 @@ const registerRules = {
 const handleLoginSubmit = async () => {
     try {
         loading.value = true;
-        router.push('/');
-        // const { data } = await login(formState);
-        // if (data?.token) {
-        //     localStorage.setItem('token', data.token);
-        //     message.success('登录成功');
-        // router.push(redirect || '/');
-
-        //     const redirect = route.query.redirect as string;
-        // }
+        const { data } = await login(formState);
+        if (data?.token) {
+            localStorage.setItem('token', data.token);
+            message.success('登录成功');
+            const redirect = route.query.redirect as string;
+            router.push(redirect || '/');
+        }
     } catch (error: any) {
         message.error(error.message || '登录失败');
     } finally {
@@ -136,9 +135,8 @@ const toggleForm = () => {
                 <a-form v-if="isLogin" :model="formState" :rules="loginRules" class="space-y-6"
                     @finish="handleLoginSubmit">
                     <div class="space-y-4">
-                        <a-form-item name="username">
-                            <a-input v-model:value="formState.username" size="large" placeholder="用户名"
-                                class="login-input">
+                        <a-form-item name="email">
+                            <a-input v-model:value="formState.email" size="large" placeholder="邮箱" class="login-input">
                                 <template #prefix>
                                     <UserOutlined class="text-gray-400" />
                                 </template>
@@ -170,7 +168,7 @@ const toggleForm = () => {
                     <div>
                         <a-button :loading="loading" type="primary" html-type="submit"
                             class="w-full h-12 text-lg font-medium login-button">
-                            {{ isRegister ? '注册' : '登录' }}
+                            {{ '登录' }}
                         </a-button>
                     </div>
                 </a-form>
@@ -179,8 +177,8 @@ const toggleForm = () => {
                 <a-form v-else :model="registerFormState" :rules="registerRules" class="space-y-6"
                     @finish="handleRegisterSubmit">
                     <div class="space-y-4">
-                        <a-form-item name="username">
-                            <a-input v-model:value="registerFormState.username" size="large" placeholder="用户名"
+                        <a-form-item name="nickname">
+                            <a-input v-model:value="registerFormState.nickname" size="large" placeholder="用户名"
                                 class="login-input">
                                 <template #prefix>
                                     <UserOutlined class="text-gray-400" />

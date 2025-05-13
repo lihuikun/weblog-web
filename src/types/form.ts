@@ -1,11 +1,12 @@
 export interface FormState {
-    username: string;
+    email: string;
+    nickname: string;
     password: string;
     remember: boolean;
 }
 
 export interface RegisterFormState {
-    username: string;
+    nickname: string;
     email: string;
     password: string;
     confirmPassword: string;

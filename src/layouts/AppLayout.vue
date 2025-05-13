@@ -41,22 +41,27 @@ const toggleMobileMenu = () => {
 // 当前选中的菜单项
 const selectedKeys = ref<string[]>([]);
 
-const sideMenuId = ref(['new'])
+// 拿到路由的侧边栏
+const route = useRoute()
+const sideMenuId = ref<string[]>(
+    route.meta.menu && Array.isArray(route.meta.menu) && route.meta.menu.length > 0
+        ? [route.meta.menu[0].key]
+        : []
+)
 
 // 导航菜单项
 const navItems = [
     { key: 'home', label: '首页', path: '/', isNew: true },
     { key: 'hot-search', label: '热搜榜', path: '/hot-search' },
     { key: 'game', label: '摸鱼小游戏', path: '/game' },
+    { key: 'dream', label: '集梦盒子', path: '/dream' },
 ];
 
-// 拿到路由的侧边栏
-const route = useRoute()
 
 const sideMenuItems = computed(() => {
     if (!route.meta.menu) return
-    sideMenuId.value = [(route.meta.menu as { key: string }[])?.[0].key]
-    console.log("🚀 ~ sideMenuItems ~ sideMenuId.value:", sideMenuId.value)
+    // sideMenuId.value = [(route.meta.menu as { key: string }[])?.[0].key]
+    console.log("🚀 ~ sideMenuItems ~ sideMenuId.value:", sideMenuId.value, route.meta.menu)
     return route.meta.menu || []
 })
 
@@ -76,6 +81,7 @@ watch(route, () => {
 
     if (matchedItem) {
         selectedKeys.value = [matchedItem.key];
+        sideMenuId.value = [(route.meta.menu as { key: string }[])?.[0].key]
     } else {
         selectedKeys.value = ['home']; // 默认选中首页
     }

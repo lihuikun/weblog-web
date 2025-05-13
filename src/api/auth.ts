@@ -3,7 +3,7 @@ import type { FormState, RegisterFormState, ResetFormState } from '@/types/form'
 
 export function login(data: FormState) {
     return request({
-        url: '/auth/login',
+        url: '/user/email/login',
         method: 'post',
         data,
     });
@@ -11,7 +11,7 @@ export function login(data: FormState) {
 
 export function register(data: RegisterFormState) {
     return request({
-        url: '/auth/register',
+        url: '/user/email/register',
         method: 'post',
         data,
     });

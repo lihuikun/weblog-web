@@ -64,6 +64,21 @@ const mainRoutes: Array<RouteRecordRaw> = [
     },
   },
   {
+    path: '/dream',
+    name: 'dream',
+    component: () => import('@/views/Dream.vue'),
+    meta: {
+      title: '集梦盒子',
+      keepAlive: true,
+      requiresAuth: true,
+      layout: 'default',
+      menu: [
+        { key: 'dream-hall', label: '梦境大厅', icon: 'user-outlined' },
+        { key: 'my-dream', label: '我的梦境', icon: 'appstore-outlined' },
+      ]
+    },
+  },
+  {
     path: '/about',
     name: 'About',
     component: () => import('../views/About.vue'),
