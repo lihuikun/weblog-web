@@ -129,32 +129,35 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="dream-hall-container">
+    <div class="h-full flex flex-col dream-hall-container">
         <div class="dream-hall-header">
             <h1>梦境大厅</h1>
             <Button type="primary" @click="handleCreate">创建梦境</Button>
         </div>
 
-        <div class="dream-list">
+        <div class="flex-1 overflow-y-auto dream-list">
             <a-spin :spinning="loading">
-                <Card v-for="dream in dreams" :key="dream.id" class="dream-card" :title="dream.title" hoverable>
-                    <template #extra>
-                        <span class="dream-date">{{ new Date(dream.createdAt).toLocaleDateString() }}</span>
-                    </template>
+                <div class="flex flex-col space-y-4 pb-4">
+                    <Card v-for="dream in dreams" :key="dream.id" class="w-full dream-card" :title="dream.title"
+                        hoverable>
+                        <template #extra>
+                            <span class="dream-date">{{ new Date(dream.createdAt).toLocaleDateString() }}</span>
+                        </template>
 
-                    <div class="dream-content">{{ dream.content }}</div>
+                        <div class="dream-content">{{ dream.content }}</div>
 
-                    <div class="dream-meta">
-                        <span class="dream-mood">
-                            心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
-                        </span>
-                        <div class="dream-tags">
-                            <Tag v-for="tag in dream.tags" :key="tag" :color="getTagColor(tag)">
-                                {{tagOptions.find(t => t.value === tag)?.label || tag}}
-                            </Tag>
+                        <div class="dream-meta">
+                            <span class="dream-mood">
+                                心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
+                            </span>
+                            <div class="dream-tags">
+                                <Tag v-for="tag in dream.tags" :key="tag" :color="getTagColor(tag)">
+                                    {{tagOptions.find(t => t.value === tag)?.label || tag}}
+                                </Tag>
+                            </div>
                         </div>
-                    </div>
-                </Card>
+                    </Card>
+                </div>
 
                 <div v-if="!dreams.length && !loading" class="empty-tip">
                     暂无梦境，快来创建吧！
@@ -221,16 +224,11 @@ onMounted(() => {
 }
 
 .dream-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    width: 100%;
 }
 
 .dream-card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    height: 100%;
+    width: 100%;
 }
 
 .dream-card:hover {

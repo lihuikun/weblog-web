@@ -41,7 +41,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="dream-container">
+    <div class="h-full dream-container">
         <!-- 移动端菜单 -->
         <div class="dream-tabs">
             <div v-for="item in (route.meta.menu as Menu[])" :key="item.key"

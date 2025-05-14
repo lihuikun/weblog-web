@@ -116,7 +116,7 @@ const router = createRouter({
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
   // 设置页面标题
-  document.title = `${to.meta.title as string || '默认标题'} - Vue3 App`;
+  document.title = `${to.meta.title as string || '默认标题'}`;
 
   // 判断是否需要登录权限
   if (to.meta.requiresAuth) {
