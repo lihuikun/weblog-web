@@ -79,6 +79,7 @@ const handleLoginSubmit = async () => {
         loading.value = true;
         const { data } = await login(formState);
         if (data?.token) {
+            localStorage.setItem('token', data.token);
             useUserStore().setToken(data.token);
             useUserStore().setUserInfo({
                 avatarUrl: data.avatarUrl,
