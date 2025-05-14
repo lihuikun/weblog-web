@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { decryptData } from './decrypt';
+import { message } from 'ant-design-vue';
 
 
 const encryptionKey = import.meta.env.VITE_CRYPTO_KEY || '';
@@ -37,7 +38,7 @@ service.interceptors.response.use(
     // 根据自定义错误码处理错误
     if (res.code && res.code !== 200) {
       console.error('Response error:', res.message || 'Error');
-
+      message.error(res.message || 'Error');
       // 401: 未登录或 token 过期
       if (res.code === 401) {
         // 可以在这里处理登出逻辑
@@ -53,7 +54,7 @@ service.interceptors.response.use(
   },
   (error) => {
     console.error('Response error:', error);
-
+    message.error(error.response.data.msg || 'Error');
     // 处理 HTTP 状态码错误
     if (error.response) {
       switch (error.response.status) {

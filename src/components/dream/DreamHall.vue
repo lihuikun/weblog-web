@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { message, Tag, Button, Card, Modal, Form, Input, Select } from 'ant-design-vue'
-import { getDreamHall, createDream, CreateDreamParams } from '@/api/dream'
+import { message, Tag, Button, Card, Modal } from 'ant-design-vue'
+import { getDreamHall, createDream, CreateDreamParams, deleteDream } from '@/api/dream'
+import DreamForm from './components/DreamForm.vue'
 
 const router = useRouter()
 const dreams = ref<any[]>([])
 const loading = ref(false)
 const formRef = ref()
+
+// 分页相关
+const page = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+const hasMore = ref(true) // 是否还有更多数据
+const loadingMore = ref(false) // 加载更多状态
 
 // 检查登录
 function checkLogin() {
@@ -21,16 +29,53 @@ function checkLogin() {
 }
 
 // 获取梦境大厅数据
-async function fetchDreams() {
-    loading.value = true
+async function fetchDreams(isLoadMore = false) {
+    if (isLoadMore) {
+        loadingMore.value = true
+    } else {
+        loading.value = true
+    }
+
     try {
-        const res = await getDreamHall()
-        dreams.value = res.data || []
+        const res = await getDreamHall({
+            page: page.value,
+            pageSize: pageSize.value
+        })
+
+        const { list, total: totalCount } = res.data || { list: [], total: 0 }
+
+        if (isLoadMore) {
+            dreams.value = [...dreams.value, ...list]
+        } else {
+            dreams.value = list || []
+        }
+
+        total.value = totalCount
+        hasMore.value = dreams.value.length < total.value
     } catch (e) {
         console.error(e)
         message.error('获取梦境失败')
     } finally {
         loading.value = false
+        loadingMore.value = false
+    }
+}
+
+// 加载更多
+async function loadMore() {
+    if (loadingMore.value || !hasMore.value) return
+
+    page.value++
+    await fetchDreams(true)
+}
+
+// 监听滚动到底部
+function handleScroll(e: Event) {
+    const element = e.target as HTMLElement
+    const scrollBottom = element.scrollHeight - element.scrollTop - element.clientHeight
+
+    if (scrollBottom < 50 && !loadingMore.value && hasMore.value) {
+        loadMore()
     }
 }
 
@@ -41,7 +86,8 @@ const formState = ref<CreateDreamParams>({
     title: '',
     content: '',
     emotion: 'happy',
-    tags: []
+    tags: [],
+    isShared: true
 })
 
 // 可选的心情列表
@@ -71,10 +117,13 @@ function handleCreate() {
 
 // 提交创建梦境
 async function handleSubmit() {
-    if (!formRef.value) return
-
     try {
-        await formRef.value.validate()
+        const dreamFormRef = formRef.value
+        if (!dreamFormRef) return
+
+        const isValid = await dreamFormRef.validate()
+        if (!isValid) return
+
         submitting.value = true
 
         await createDream(formState.value)
@@ -86,14 +135,16 @@ async function handleSubmit() {
             title: '',
             content: '',
             emotion: 'happy',
-            tags: []
+            tags: [],
+            isShared: true
         }
+        dreamFormRef.resetFields()
 
-        // 刷新梦境列表
-        fetchDreams()
+        // 重置页码并重新获取数据
+        page.value = 1
+        await fetchDreams()
     } catch (e) {
         console.error(e)
-        message.error('梦境创建失败')
     } finally {
         submitting.value = false
     }
@@ -103,12 +154,6 @@ function handleCancel() {
     showModal.value = false
 }
 
-// 表单校验规则
-const rules = {
-    title: [{ required: true, message: '请输入梦境标题', trigger: 'blur' }],
-    content: [{ required: true, message: '请输入梦境内容', trigger: 'blur' }],
-    emotion: [{ required: true, message: '请选择心情', trigger: 'change' }]
-}
 
 // 根据标签获取颜色
 function getTagColor(tag: string): string {
@@ -122,26 +167,44 @@ function getTagColor(tag: string): string {
     }
     return colorMap[tag] || 'blue'
 }
-
+// 删除梦境
+async function handleDelete(id: string) {
+    if (!checkLogin()) return
+    try {
+        await deleteDream(id)
+        message.success('梦境删除成功')
+        // 如果当前页没有数据了，回到上一页
+        if (dreams.value.length === 1 && page.value > 1) {
+            page.value--
+        }
+        // 删除当前梦境
+        dreams.value = dreams.value.filter(dream => dream.id !== id)
+    } catch (e) {
+        console.error(e)
+        message.error('梦境删除失败')
+    }
+}
 onMounted(() => {
     fetchDreams()
 })
 </script>
 
 <template>
-    <div class="h-full flex flex-col dream-hall-container">
+    <div class="flex flex-col h-full dream-hall-container">
         <div class="dream-hall-header">
             <h1>梦境大厅</h1>
             <Button type="primary" @click="handleCreate">创建梦境</Button>
         </div>
 
-        <div class="flex-1 overflow-y-auto dream-list">
+        <div class="overflow-y-auto flex-1 dream-list scrollbar-hide" @scroll="handleScroll">
             <a-spin :spinning="loading">
-                <div class="flex flex-col space-y-4 pb-4">
+                <div class="flex flex-col pb-4 space-y-4">
                     <Card v-for="dream in dreams" :key="dream.id" class="w-full dream-card" :title="dream.title"
                         hoverable>
                         <template #extra>
-                            <span class="dream-date">{{ new Date(dream.createdAt).toLocaleDateString() }}</span>
+                            <span class="dream-date">{{ new Date(dream.createTime).toLocaleDateString() }}</span>
+                            <!-- 删除按钮 -->
+                            <AButton v-permission="'admin'" type="link" @click="handleDelete(dream.id)">删除</AButton>
                         </template>
 
                         <div class="dream-content">{{ dream.content }}</div>
@@ -157,6 +220,16 @@ onMounted(() => {
                             </div>
                         </div>
                     </Card>
+
+                    <!-- 加载更多状态 -->
+                    <div v-if="loadingMore" class="flex justify-center py-4">
+                        <a-spin />
+                    </div>
+
+                    <!-- 无更多数据 -->
+                    <div v-if="!hasMore && dreams.length > 0" class="py-4 text-center text-gray-400">
+                        已经到底啦 ~
+                    </div>
                 </div>
 
                 <div v-if="!dreams.length && !loading" class="empty-tip">
@@ -168,31 +241,7 @@ onMounted(() => {
         <!-- 创建梦境对话框 -->
         <Modal v-model:open="showModal" title="创建梦境" :width="500" :confirmLoading="submitting" @ok="handleSubmit"
             @cancel="handleCancel">
-            <a-form :model="formState" ref="formRef" :rules="rules" layout="vertical">
-                <a-form-item name="title" label="梦境标题" required>
-                    <a-input v-model:value="formState.title" placeholder="给你的梦境起个名字吧" />
-                </a-form-item>
-
-                <a-form-item name="content" label="梦境内容" required>
-                    <a-textarea v-model:value="formState.content" :rows="4" placeholder="描述一下你的梦境..." />
-                </a-form-item>
-
-                <a-form-item name="emotion" label="心情" required>
-                    <a-select v-model:value="formState.emotion" placeholder="选择心情">
-                        <a-select-option v-for="option in moodOptions" :key="option.value" :value="option.value">
-                            {{ option.label }}
-                        </a-select-option>
-                    </a-select>
-                </a-form-item>
-
-                <a-form-item name="tags" label="标签">
-                    <a-select v-model:value="formState.tags" mode="multiple" placeholder="选择标签(可多选)" :maxTagCount="3">
-                        <a-select-option v-for="option in tagOptions" :key="option.value" :value="option.value">
-                            {{ option.label }}
-                        </a-select-option>
-                    </a-select>
-                </a-form-item>
-            </a-form>
+            <DreamForm ref="formRef" v-model:formState="formState" :title="'创建梦境'" :submitting="submitting" />
         </Modal>
     </div>
 </template>
@@ -221,6 +270,10 @@ onMounted(() => {
     color: #333;
     margin: 0;
     font-weight: 600;
+    background: linear-gradient(45deg, #1890ff, #722ed1);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
 }
 
 .dream-list {
@@ -232,8 +285,7 @@ onMounted(() => {
 }
 
 .dream-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .dream-content {

@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { message, Tag, Button, Card, Modal, Form, Input, Select, Popconfirm } from 'ant-design-vue'
+import { message, Tag, Button, Card, Modal, Popconfirm } from 'ant-design-vue'
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import { getMyDreams, createDream, updateDream, deleteDream, CreateDreamParams } from '@/api/dream'
+import DreamForm from './components/DreamForm.vue'
 
 const router = useRouter()
 const dreams = ref<any[]>([])
 const loading = ref(false)
 const formRef = ref()
+
+// 分页相关
+const page = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+const hasMore = ref(true) // 是否还有更多数据
+const loadingMore = ref(false) // 加载更多状态
 
 // 检查登录
 function checkLogin() {
@@ -22,17 +30,55 @@ function checkLogin() {
 }
 
 // 获取我的梦境数据
-async function fetchMyDreams() {
+async function fetchMyDreams(isLoadMore = false) {
     if (!checkLogin()) return
-    loading.value = true
+
+    if (isLoadMore) {
+        loadingMore.value = true
+    } else {
+        loading.value = true
+    }
+
     try {
-        const res = await getMyDreams()
-        dreams.value = res.data || []
+        const res = await getMyDreams({
+            page: page.value,
+            pageSize: pageSize.value
+        })
+
+        const { list, total: totalCount } = res.data || { list: [], total: 0 }
+
+        if (isLoadMore) {
+            dreams.value = [...dreams.value, ...list]
+        } else {
+            dreams.value = list || []
+        }
+
+        total.value = totalCount
+        hasMore.value = dreams.value.length < total.value
     } catch (e) {
         console.error(e)
         message.error('获取我的梦境失败')
     } finally {
         loading.value = false
+        loadingMore.value = false
+    }
+}
+
+// 加载更多
+async function loadMore() {
+    if (loadingMore.value || !hasMore.value) return
+
+    page.value++
+    await fetchMyDreams(true)
+}
+
+// 监听滚动到底部
+function handleScroll(e: Event) {
+    const element = e.target as HTMLElement
+    const scrollBottom = element.scrollHeight - element.scrollTop - element.clientHeight
+
+    if (scrollBottom < 50 && !loadingMore.value && hasMore.value) {
+        loadMore()
     }
 }
 
@@ -45,7 +91,8 @@ const formState = ref<CreateDreamParams>({
     title: '',
     content: '',
     emotion: 'happy',
-    tags: []
+    tags: [],
+    isShared: false
 })
 
 // 可选的心情列表
@@ -76,7 +123,8 @@ function handleCreate() {
         title: '',
         content: '',
         emotion: 'happy',
-        tags: []
+        tags: [],
+        isShared: false
     }
     showModal.value = true
 }
@@ -90,17 +138,21 @@ function handleEdit(dream: any) {
         title: dream.title,
         content: dream.content,
         emotion: dream.emotion || 'happy',
-        tags: dream.tags || []
+        tags: dream.tags || [],
+        isShared: dream.isShared || false
     }
     showModal.value = true
 }
 
 // 提交创建或更新梦境
 async function handleSubmit() {
-    if (!formRef.value) return
-
     try {
-        await formRef.value.validate()
+        const dreamFormRef = formRef.value
+        if (!dreamFormRef) return
+
+        const isValid = await dreamFormRef.validate()
+        if (!isValid) return
+
         submitting.value = true
 
         if (isEdit.value) {
@@ -118,14 +170,17 @@ async function handleSubmit() {
             title: '',
             content: '',
             emotion: 'happy',
-            tags: []
+            tags: [],
+            isShared: false
         }
+        dreamFormRef.resetFields()
 
-        // 刷新梦境列表
-        fetchMyDreams()
+        // 重置页码并重新获取数据
+        page.value = 1
+        await fetchMyDreams()
     } catch (e) {
         console.error(e)
-        message.error(isEdit.value ? '梦境更新失败' : '梦境创建失败')
+        // message.error(isEdit.value ? '梦境更新失败' : '梦境创建失败')
     } finally {
         submitting.value = false
     }
@@ -137,10 +192,14 @@ async function handleDelete(id: string) {
     try {
         await deleteDream(id)
         message.success('梦境删除成功')
-        fetchMyDreams()
+        // 如果当前页没有数据了，回到上一页
+        if (dreams.value.length === 1 && page.value > 1) {
+            page.value--
+        }
+        // 删除当前梦境
+        dreams.value = dreams.value.filter(dream => dream.id !== id)
     } catch (e) {
         console.error(e)
-        message.error('梦境删除失败')
     }
 }
 
@@ -177,7 +236,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="my-dream-container">
+    <div class="flex flex-col h-full my-dream-container">
         <div class="my-dream-header">
             <h1>我的梦境</h1>
             <Button type="primary" @click="handleCreate">
@@ -188,45 +247,58 @@ onMounted(() => {
             </Button>
         </div>
 
-        <div class="dream-list">
+        <div class="overflow-y-auto flex-1 dream-list scrollbar-hide" @scroll="handleScroll">
             <a-spin :spinning="loading">
-                <Card v-for="dream in dreams" :key="dream.id" class="dream-card" :title="dream.title" hoverable>
-                    <template #extra>
-                        <div class="dream-actions">
-                            <Button type="text" shape="circle" @click="handleEdit(dream)">
-                                <template #icon>
-                                    <EditOutlined />
-                                </template>
-                            </Button>
-                            <Popconfirm title="确定要删除这个梦境吗？" @confirm="handleDelete(dream.id)" okText="确定"
-                                cancelText="取消">
-                                <Button type="text" shape="circle" danger>
+                <div class="grid grid-cols-1 gap-4">
+                    <Card v-for="dream in dreams" :key="dream.id" class="dream-card" :title="dream.title">
+                        <template #extra>
+                            <div class="dream-actions">
+                                <Button type="text" shape="circle" @click="handleEdit(dream)">
                                     <template #icon>
-                                        <DeleteOutlined />
+                                        <EditOutlined />
                                     </template>
                                 </Button>
-                            </Popconfirm>
+                                <Popconfirm title="确定要删除这个梦境吗？" @confirm="handleDelete(dream.id)" okText="确定"
+                                    cancelText="取消">
+                                    <Button type="text" shape="circle" danger>
+                                        <template #icon>
+                                            <DeleteOutlined />
+                                        </template>
+                                    </Button>
+                                </Popconfirm>
+                            </div>
+                        </template>
+
+                        <div class="dream-content">{{ dream.content }}</div>
+
+                        <div class="dream-footer">
+                            <div class="dream-info">
+                                <span class="dream-mood">
+                                    心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
+                                </span>
+                                <span class="dream-date">{{ new Date(dream.createTime).toLocaleDateString() }}</span>
+                            </div>
+
+                            <div class="dream-tags">
+                                <Tag v-for="tag in dream.tags" :key="tag" :color="getTagColor(tag)">
+                                    {{tagOptions.find(t => t.value === tag)?.label || tag}}
+                                </Tag>
+                            </div>
                         </div>
-                    </template>
+                    </Card>
+                </div>
 
-                    <div class="dream-content">{{ dream.content }}</div>
+                <!-- 加载更多状态 -->
+                <div v-if="loadingMore" class="flex justify-center py-4">
+                    <a-spin />
+                </div>
 
-                    <div class="dream-footer">
-                        <div class="dream-info">
-                            <span class="dream-mood">
-                                心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
-                            </span>
-                            <span class="dream-date">{{ new Date(dream.createdAt).toLocaleDateString() }}</span>
-                        </div>
+                <!-- 无更多数据 -->
+                <div v-if="!hasMore && dreams.length > 0" class="py-4 text-center text-gray-400">
+                    已经到底啦 ~
+                </div>
 
-                        <div class="dream-tags">
-                            <Tag v-for="tag in dream.tags" :key="tag" :color="getTagColor(tag)">
-                                {{tagOptions.find(t => t.value === tag)?.label || tag}}
-                            </Tag>
-                        </div>
-                    </div>
-                </Card>
-
+                <!-- 无梦境数据提示 -->
                 <div v-if="!dreams.length && !loading" class="empty-tip">
                     <p>还没有记录梦境</p>
                     <Button type="primary" @click="handleCreate">立即创建</Button>
@@ -237,31 +309,8 @@ onMounted(() => {
         <!-- 创建/编辑梦境对话框 -->
         <Modal v-model:open="showModal" :title="isEdit ? '编辑梦境' : '创建梦境'" :width="500" :confirmLoading="submitting"
             @ok="handleSubmit" @cancel="handleCancel">
-            <a-form :model="formState" ref="formRef" :rules="rules" layout="vertical">
-                <a-form-item name="title" label="梦境标题" required>
-                    <a-input v-model:value="formState.title" placeholder="给你的梦境起个名字吧" />
-                </a-form-item>
-
-                <a-form-item name="content" label="梦境内容" required>
-                    <a-textarea v-model:value="formState.content" :rows="4" placeholder="描述一下你的梦境..." />
-                </a-form-item>
-
-                <a-form-item name="emotion" label="心情" required>
-                    <a-select v-model:value="formState.emotion" placeholder="选择心情" :allow-clear="false">
-                        <a-select-option v-for="option in moodOptions" :key="option.value" :value="option.value">
-                            {{ option.label }}
-                        </a-select-option>
-                    </a-select>
-                </a-form-item>
-
-                <a-form-item name="tags" label="标签">
-                    <a-select v-model:value="formState.tags" mode="multiple" placeholder="选择标签(可多选)" :maxTagCount="3">
-                        <a-select-option v-for="option in tagOptions" :key="option.value" :value="option.value">
-                            {{ option.label }}
-                        </a-select-option>
-                    </a-select>
-                </a-form-item>
-            </a-form>
+            <DreamForm ref="formRef" v-model:formState="formState" :title="isEdit ? '编辑梦境' : '创建梦境'" :is-edit="isEdit"
+                :submitting="submitting" />
         </Modal>
     </div>
 </template>
@@ -297,23 +346,19 @@ onMounted(() => {
 }
 
 .dream-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    width: 100%;
 }
 
 .dream-card {
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
     height: 100%;
     position: relative;
     overflow: hidden;
 }
 
 .dream-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .dream-card:before {

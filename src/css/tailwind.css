@@ -38,3 +38,7 @@ body {
     background-color: #ffffff;
   }
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -3,18 +3,20 @@ import type { FormState, RegisterFormState, ResetFormState } from '@/types/form'
 
 
 // 获取梦境大厅数据
-export function getDreamHall() {
+export function getDreamHall(params?: { page?: number; pageSize?: number }) {
     return request({
         url: '/dream',
         method: 'get',
+        params
     });
 }
 
 // 获取我的梦境数据
-export function getMyDreams() {
+export function getMyDreams(params?: { page?: number; pageSize?: number }) {
     return request({
         url: '/dream/my',
         method: 'get',
+        params
     });
 }
 
@@ -24,6 +26,7 @@ export interface CreateDreamParams {
     content: string;
     emotion: string;
     tags: string[];
+    isShared: boolean;
 }
 
 export function createDream(data: CreateDreamParams) {
@@ -46,7 +49,7 @@ export function deleteDream(id: string) {
 export function updateDream(id: string, data: Partial<CreateDreamParams>) {
     return request({
         url: `/dream/${id}`,
-        method: 'put',
+        method: 'patch',
         data,
     });
 } 

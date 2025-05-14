@@ -5,6 +5,7 @@ import { message } from 'ant-design-vue';
 import { UserOutlined, LockOutlined, WechatOutlined, QqOutlined, WeiboOutlined, MailOutlined } from '@ant-design/icons-vue';
 import type { FormState, RegisterFormState } from '@/types/form';
 import { login, register } from '@/api/auth';
+import { useUserStore } from '@/stores/userStore';
 
 const router = useRouter();
 const route = useRoute();
@@ -78,7 +79,14 @@ const handleLoginSubmit = async () => {
         loading.value = true;
         const { data } = await login(formState);
         if (data?.token) {
-            localStorage.setItem('token', data.token);
+            useUserStore().setToken(data.token);
+            useUserStore().setUserInfo({
+                avatarUrl: data.avatarUrl,
+                nickname: data.nickname,
+                roles: data.role,
+                email: data.email,
+                id: data.id
+            });
             message.success('登录成功');
             const redirect = route.query.redirect as string;
             router.push(redirect || '/');

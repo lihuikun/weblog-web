@@ -74,7 +74,7 @@ async function getPVTotal() {
     const { data } = await getPV()
     PVTotal.value = data as PV
 }
-
+const contentRef = ref<HTMLElement | null>(null)
 watch(route, () => {
     const currentPath = route.path;
     const matchedItem = navItems.find(item => item.path === currentPath);
@@ -85,6 +85,8 @@ watch(route, () => {
     } else {
         selectedKeys.value = ['home']; // 默认选中首页
     }
+    // 内容容器滚动到顶部
+    contentRef.value?.scrollTo(0, 0)
 });
 
 // 获取当前年
@@ -105,7 +107,11 @@ const handleLogout = async () => {
         message.error(error.message || '退出失败');
     }
 };
-
+function handleMenuClick(key: string) {
+    console.log("🚀 ~ handleMenuClick ~ key:", key, contentRef.value)
+    // 内容容器滚动到顶部
+    contentRef.value?.scrollTo({ top: 0, behavior: 'smooth' });
+}
 onMounted(() => {
     getPVTotal()
 })
@@ -134,8 +140,8 @@ onMounted(() => {
                             <a-menu-item v-for="item in navItems" :key="item.key">
                                 <router-link :to="item.path">
                                     <span>{{ item.label }}</span>
-                                    <a-badge v-if="item.isNew" dot class="absolute -top-1 -right-1 ml-1"
-                                        color="#f5222d" />
+                                    <!-- <a-badge v-if="item.isNew" dot class="absolute -top-1 -right-1 ml-1"
+                                        color="#f5222d" /> -->
                                 </router-link>
                             </a-menu-item>
                         </a-menu>
@@ -259,7 +265,7 @@ onMounted(() => {
                     <a-layout-sider class="hidden bg-transparent md:block" width="200"
                         :style="{ background: 'transparent' }" breakpoint="lg" collapsed-width="0">
                         <a-menu mode="inline" v-model:selectedKeys="sideMenuId" class="bg-white rounded-lg shadow-sm"
-                            style="height: 100%">
+                            style="height: 100%" @click="handleMenuClick">
                             <a-menu-item v-for="item in (sideMenuItems as Menu[])" :key="item.key">
                                 <template #icon>
                                     <a-icon>
@@ -272,9 +278,10 @@ onMounted(() => {
                     </a-layout-sider>
 
                     <!-- 内容区域 -->
-                    <a-layout-content class="px-6 bg-white xs:px-0">
+                    <div ref="contentRef"
+                        class="overflow-y-auto px-6 h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1">
                         <slot :sideMenuId="sideMenuId" />
-                    </a-layout-content>
+                    </div>
 
                     <!-- 右侧边栏 - 仅在大屏幕显示 -->
                     <a-layout-sider class="hidden bg-transparent lg:block" width="300"
