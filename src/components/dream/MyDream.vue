@@ -236,7 +236,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col h-full my-dream-container">
+    <div class="flex flex-col h-full bg-white my-dream-container">
         <div class="my-dream-header">
             <h1>我的梦境</h1>
             <Button type="primary" @click="handleCreate">
@@ -319,7 +319,6 @@ onMounted(() => {
 .my-dream-container {
     max-width: 900px;
     margin: 0 auto;
-    background: #fff;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
     padding: 32px 24px;

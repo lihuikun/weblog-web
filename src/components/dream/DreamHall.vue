@@ -190,7 +190,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col h-full dream-hall-container">
+    <div class="flex flex-col h-full bg-white dream-hall-container">
         <div class="dream-hall-header">
             <h1>梦境大厅</h1>
             <Button type="primary" @click="handleCreate">创建梦境</Button>
@@ -250,7 +250,6 @@ onMounted(() => {
 .dream-hall-container {
     max-width: 900px;
     margin: 0 auto;
-    background: #fff;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
     padding: 32px 24px;

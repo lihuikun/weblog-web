@@ -32,7 +32,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col h-full dream-container">
+    <div class="flex flex-col h-full bg-white dream-container">
         <!-- 移动端菜单 -->
         <div class="dream-tabs">
             <div v-for="item in (route.meta.menu as Menu[])" :key="item.key"

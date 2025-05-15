@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, watchEffect, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { BellOutlined, CaretDownOutlined } from '@ant-design/icons-vue';
 import { theme, message } from 'ant-design-vue';
@@ -10,8 +10,11 @@ import { Menu } from '@/router/index';
 import { getPV, PV } from '@/api/pv';
 import logo from '@/assets/logo.jpg';
 import { logout } from '@/api/auth';
+import { getUnreadCount } from '@/api/message';
+import { useUserStore } from '@/stores/userStore';
 
 const themeStore = useThemeStore();
+const userStore = useUserStore();
 const router = useRouter();
 
 const themeConfig = computed(() => ({
@@ -55,6 +58,7 @@ const navItems = [
     { key: 'hot-search', label: '热搜榜', path: '/hot-search' },
     { key: 'game', label: '摸鱼小游戏', path: '/game' },
     { key: 'dream', label: '集梦盒子', path: '/dream' },
+    { key: 'daily-quote', label: '每日一句', path: '/daily-quote' },
 ];
 
 
@@ -92,6 +96,15 @@ watch(route, () => {
 // 获取当前年
 const year = new Date().getFullYear()
 
+// 获取用户信息
+const userInfo = computed(() => userStore.userInfo || { nickname: '', avatar: '' });
+const avatarUrl = computed(() => userInfo.value?.avatar || '');
+const username = computed(() => userInfo.value?.nickname || 'U');
+const userFirstLetter = computed(() => {
+    if (!username.value) return 'U';
+    return username.value.charAt(0).toUpperCase();
+});
+
 // 添加登录状态判断
 const isLoggedIn = computed(() => {
     return !!localStorage.getItem('token');
@@ -112,9 +125,69 @@ function handleMenuClick(key: string) {
     // 内容容器滚动到顶部
     contentRef.value?.scrollTo({ top: 0, behavior: 'smooth' });
 }
+function handleMessage() {
+    router.push('/message')
+}
+
+// 添加未读消息数量
+const unreadCount = ref(0);
+let pollingTimer: number | null = null;
+
+// 获取未读消息数量
+const fetchUnreadCount = async () => {
+    if (!isLoggedIn.value) {
+        unreadCount.value = 0;
+        return;
+    }
+
+    try {
+        const res = await getUnreadCount();
+        unreadCount.value = res.data || 0;
+    } catch (error) {
+        console.error('获取未读消息数量失败', error);
+    }
+};
+
+// 开始轮询
+const startPolling = () => {
+    // 先立即执行一次
+    fetchUnreadCount();
+
+    // 设置10秒轮询
+    pollingTimer = window.setInterval(() => {
+        fetchUnreadCount();
+    }, 10000);
+};
+
+// 停止轮询
+const stopPolling = () => {
+    if (pollingTimer) {
+        clearInterval(pollingTimer);
+        pollingTimer = null;
+    }
+};
+
+// 监听登录状态变化
+watch(isLoggedIn, (newValue) => {
+    if (newValue) {
+        startPolling();
+    } else {
+        stopPolling();
+        unreadCount.value = 0;
+    }
+});
+
+// 组件挂载时启动轮询，卸载时停止轮询
 onMounted(() => {
-    getPVTotal()
-})
+    getPVTotal();
+    if (isLoggedIn.value) {
+        startPolling();
+    }
+});
+
+onBeforeUnmount(() => {
+    stopPolling();
+});
 </script>
 
 <template>
@@ -151,7 +224,7 @@ onMounted(() => {
                     <div class="flex items-center space-x-4">
                         <!-- 通知图标只在登录后显示 -->
                         <template v-if="isLoggedIn">
-                            <a-badge count="5">
+                            <a-badge :count="unreadCount" @click="handleMessage">
                                 <a-button type="text" shape="circle">
                                     <template #icon>
                                         <BellOutlined />
@@ -168,7 +241,10 @@ onMounted(() => {
                         <!-- 根据登录状态显示不同的内容 -->
                         <template v-if="isLoggedIn">
                             <a-dropdown>
-                                <a-avatar src="@/assets/logo.jpg" :size="36" />
+                                <a-avatar v-if="avatarUrl" :src="avatarUrl" :size="36" />
+                                <a-avatar v-else :size="36" style="background-color: #1890ff">
+                                    {{ userFirstLetter }}
+                                </a-avatar>
                                 <template #overlay>
                                     <a-menu>
                                         <a-menu-item key="1">我的主页</a-menu-item>
@@ -222,8 +298,19 @@ onMounted(() => {
                             <img width="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
                         </div>
                         <template v-if="isLoggedIn">
+                            <a-badge :count="unreadCount" @click="handleMessage">
+                                <a-button type="text" shape="circle" size="small">
+                                    <template #icon>
+                                        <BellOutlined />
+                                    </template>
+                                </a-button>
+                            </a-badge>
+
                             <a-dropdown>
-                                <a-avatar :src="logo" :size="28" />
+                                <a-avatar v-if="avatarUrl" :src="avatarUrl" :size="28" />
+                                <a-avatar v-else :size="28" style="background-color: #1890ff">
+                                    {{ userFirstLetter }}
+                                </a-avatar>
                                 <template #overlay>
                                     <a-menu>
                                         <a-menu-item key="1">我的主页</a-menu-item>
