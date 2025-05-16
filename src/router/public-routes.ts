@@ -12,6 +12,16 @@ const publicRoutes: Array<RouteRecordRaw> = [
         }
     },
     {
+        path: '/github-callback',
+        name: 'GithubCallback',
+        component: () => import('@/views/Login.vue'),
+        meta: {
+            title: 'GitHub登录回调',
+            requiresAuth: false,
+            layout: 'blank'
+        }
+    },
+    {
         path: '/forgot-password',
         name: 'ForgotPassword',
         component: () => import('@/views/ForgotPassword.vue'),

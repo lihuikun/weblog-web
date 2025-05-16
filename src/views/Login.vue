@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { message } from 'ant-design-vue';
-import { UserOutlined, LockOutlined, WechatOutlined, QqOutlined, WeiboOutlined, MailOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, LockOutlined, GithubOutlined, QqOutlined, WeiboOutlined, MailOutlined } from '@ant-design/icons-vue';
 import type { FormState, RegisterFormState } from '@/types/form';
-import { login, register } from '@/api/auth';
+import { login, register, githubLogin } from '@/api/auth';
 import { useUserStore } from '@/stores/userStore';
 
 const router = useRouter();
 const route = useRoute();
 const loading = ref(false);
+const githubLoading = ref(false);
 const isLogin = ref(true);
 
 const formState = reactive<FormState>({
@@ -117,6 +118,30 @@ const handleRegisterSubmit = async () => {
 const toggleForm = () => {
     isLogin.value = !isLogin.value;
 };
+function handleGithubLogin() {
+    const url = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_CALLBACK_URL}`;
+    window.location.href = url;
+}
+// 跳转回登录页面，拿到code，进行登录
+async function handleGithubCallback() {
+    const { code } = route.query;
+    console.log(code);
+    const { data } = await githubLogin(code as string);
+    console.log("🚀 ~ handleGithubCallback ~ data:", data)
+    if (data?.token) {
+        localStorage.setItem('token', data.token);
+        useUserStore().setToken(data.token);
+        useUserStore().setUserInfo({
+            avatarUrl: data.avatarUrl,
+        });
+        message.success('登录成功');
+        const redirect = route.query.redirect as string;
+        router.push(redirect || '/');
+    }
+}
+onMounted(() => {
+    handleGithubCallback();
+});
 </script>
 
 <template>
@@ -252,8 +277,8 @@ const toggleForm = () => {
                     </div>
 
                     <div class="grid grid-cols-3 gap-3 mt-6">
-                        <a-button class="social-button">
-                            <WechatOutlined class="text-lg" />
+                        <a-button class="social-button" @click="handleGithubLogin">
+                            <GithubOutlined class="text-lg" />
                         </a-button>
                         <a-button class="social-button">
                             <QqOutlined class="text-lg" />
