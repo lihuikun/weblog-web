@@ -119,13 +119,17 @@ const toggleForm = () => {
     isLogin.value = !isLogin.value;
 };
 function handleGithubLogin() {
-    const url = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${import.meta.env.VITE_GITHUB_CALLBACK_URL}`;
+    // 获取当前页面地址的域名
+    const currentUrl = window.location.origin + '/#/login';
+    const url = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${currentUrl}`;
     window.location.href = url;
 }
 // 跳转回登录页面，拿到code，进行登录
 async function handleGithubCallback() {
-    const { code } = route.query;
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get('code');
     console.log(code);
+    if (!code) return
     const { data } = await githubLogin(code as string);
     console.log("🚀 ~ handleGithubCallback ~ data:", data)
     if (data?.token) {
@@ -133,10 +137,14 @@ async function handleGithubCallback() {
         useUserStore().setToken(data.token);
         useUserStore().setUserInfo({
             avatarUrl: data.avatarUrl,
+            nickname: data.nickname,
+            roles: data.role,
+            email: data.email,
+            id: data.id
         });
         message.success('登录成功');
-        const redirect = route.query.redirect as string;
-        router.push(redirect || '/');
+        // 跳转回首页去掉code
+        window.location.href = window.location.origin + '/';
     }
 }
 onMounted(() => {
