@@ -60,6 +60,10 @@ const handleEdit = (item: any) => {
 }
 const handlePreview = (item: any) => {
   visible.value = true
+  // 绕开掘金防盗链
+  item.content = item.content.replace(/<img\s+[^>]*src="(https?:\/\/[^"]+)"[^>]*>/g,
+    (m: string, url: string | number | boolean) => m.replace(url as string, `/proxy/img?url=${encodeURIComponent(url as string)}`)
+  )
   article.value = item
   isPreview.value = true
   console.log("🚀 ~ handlePreview ~ article.value:", article.value)
