@@ -6,8 +6,6 @@ import View from '@/assets/icons/view.svg';
 import Editor from '@/views/Editor.vue';
 import { vMarkdown } from '@/directives/markdown'
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { UploadProps } from 'ant-design-vue';
-import { UploadOutlined } from '@ant-design/icons-vue';
 
 interface Post {
   id: number;
@@ -158,19 +156,13 @@ const directives = {
 <template>
   <div>
     <div class="mb-6">
-      <h2 class="mb-2 text-lg">测试上传图片</h2>
-      <a-upload :action="'https://gitee-img.lihk180542.workers.dev'" name="file">
-        <a-button type="primary">上传图片</a-button>
-      </a-upload>
+      <!-- <h2 class="mb-2 text-lg">测试上传图片</h2>
       <a-upload :custom-request="customRequest" :show-upload-list="true" :multiple="false" accept="image/*"
         @change="handleUploadChange" list-type="picture" name="files">
         <a-button :loading="uploading" type="primary">
-          <template #icon>
-            <UploadOutlined />
-          </template>
-          u4e0au4f20u56feu7247
+          上传图片
         </a-button>
-      </a-upload>
+      </a-upload> -->
 
       <!-- 显示上传的图片 -->
       <div v-if="uploadedUrl" class="mt-4">
