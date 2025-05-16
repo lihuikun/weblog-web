@@ -107,13 +107,13 @@ const userFirstLetter = computed(() => {
 
 // 添加登录状态判断
 const isLoggedIn = computed(() => {
-    return !!localStorage.getItem('token');
+    return !!userStore.token;
 });
 
 // 添加退出登录方法
 const handleLogout = async () => {
     try {
-        localStorage.removeItem('token');
+        userStore.setToken('');
         message.success('退出登录成功');
         router.push('/login');
     } catch (error: any) {

@@ -133,7 +133,6 @@ async function handleGithubCallback() {
     const { data } = await githubLogin(code as string);
     console.log("🚀 ~ handleGithubCallback ~ data:", data)
     if (data?.token) {
-        localStorage.setItem('token', data.token);
         useUserStore().setToken(data.token);
         useUserStore().setUserInfo({
             avatarUrl: data.avatarUrl,
@@ -144,7 +143,8 @@ async function handleGithubCallback() {
         });
         message.success('登录成功');
         // 跳转回首页去掉code
-        window.location.href = window.location.origin + '/';
+        const redirect = route.query.redirect as string;
+        router.push(redirect || '/');
     }
 }
 onMounted(() => {
