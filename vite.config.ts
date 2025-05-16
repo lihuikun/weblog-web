@@ -37,6 +37,11 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_BASE_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '')
+        },
+        '/upload': {
+          target: env.VITE_UPLOAD_BASE_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/upload/, '')
         }
       }
     },
