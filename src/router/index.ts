@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import publicRoutes from './public-routes';
 import { message } from 'ant-design-vue';
+import { useUserStore } from '@/stores/userStore';
 
 export interface Menu {
   key: string;
@@ -147,14 +148,14 @@ router.beforeEach((to, from, next) => {
 
   // 判断是否需要登录权限
   if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // message.warning('请先登录');
-      // next({
-      //   path: '/login',
-      //   query: { redirect: to.fullPath } // 保存要跳转的路由
-      // });
-      // return;
+    const userStore = useUserStore();
+    if (!userStore.token) {
+      message.warning('请先登录');
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath } // 保存要跳转的路由
+      });
+      return;
     }
   }
   next();

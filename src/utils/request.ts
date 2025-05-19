@@ -1,14 +1,13 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { decryptData } from './decrypt';
 import { message } from 'ant-design-vue';
 import { useUserStore } from '@/stores/userStore';
-
 
 const encryptionKey = import.meta.env.VITE_CRYPTO_KEY || '';
 console.log("🚀 ~ import.meta.env:", import.meta.env)
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
@@ -17,11 +16,10 @@ const service: AxiosInstance = axios.create({
 
 // 请求拦截器
 service.interceptors.request.use(
-  (config) => {
-    // 在请求发送之前做一些处理，例如添加 token
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+  (config: InternalAxiosRequestConfig) => {
+    const userStore = useUserStore();
+    if (userStore.token) {
+      config.headers.Authorization = `Bearer ${userStore.token}`;
     }
     return config;
   },
@@ -42,9 +40,10 @@ service.interceptors.response.use(
       message.error(res.message || 'Error');
       // 401: 未登录或 token 过期
       if (res.code === 401) {
-        // 可以在这里处理登出逻辑
-        // store.dispatch('user/logout');
-        // router.push('/login');
+        const userStore = useUserStore();
+        userStore.setToken('');
+        userStore.setUserInfo(null);
+        window.location.href = '/login';
       }
 
       return Promise.reject(new Error(res.message || 'Error'));
@@ -61,13 +60,17 @@ service.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           // 未授权，跳转到登录页
-          // router.push('/login');
+          const userStore = useUserStore();
+          userStore.setToken('');
+          userStore.setUserInfo(null);
+          window.location.href = '/login';
           break;
         case 403:
           // 禁止访问
           message.error('禁止访问');
           // 清掉pinia的token
           useUserStore().setToken('');
+          useUserStore().setUserInfo(null);
           break;
         case 404:
           // 资源不存在
@@ -83,22 +86,22 @@ service.interceptors.response.use(
 );
 
 // 封装 GET 请求
-export function get<T>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
+export function get<T>(url: string, params?: any, config?: InternalAxiosRequestConfig): Promise<T> {
   return service.get(url, { params, ...config });
 }
 
 // 封装 POST 请求
-export function post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+export function post<T>(url: string, data?: any, config?: InternalAxiosRequestConfig): Promise<T> {
   return service.post(url, data, config);
 }
 
 // 封装 PUT 请求
-export function put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+export function put<T>(url: string, data?: any, config?: InternalAxiosRequestConfig): Promise<T> {
   return service.put(url, data, config);
 }
 
 // 封装 DELETE 请求
-export function del<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+export function del<T>(url: string, config?: InternalAxiosRequestConfig): Promise<T> {
   return service.delete(url, config);
 }
 

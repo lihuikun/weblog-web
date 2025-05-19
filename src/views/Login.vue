@@ -12,6 +12,7 @@ const route = useRoute();
 const loading = ref(false);
 const githubLoading = ref(false);
 const isLogin = ref(true);
+const userStore = useUserStore();
 
 const formState = reactive<FormState>({
     email: '',
@@ -80,9 +81,8 @@ const handleLoginSubmit = async () => {
         loading.value = true;
         const { data } = await login(formState);
         if (data?.token) {
-            localStorage.setItem('token', data.token);
-            useUserStore().setToken(data.token);
-            useUserStore().setUserInfo({
+            userStore.setToken(data.token);
+            userStore.setUserInfo({
                 avatarUrl: data.avatarUrl,
                 nickname: data.nickname,
                 roles: data.role,
@@ -133,8 +133,8 @@ async function handleGithubCallback() {
     const { data } = await githubLogin(code as string);
     console.log("🚀 ~ handleGithubCallback ~ data:", data)
     if (data?.token) {
-        useUserStore().setToken(data.token);
-        useUserStore().setUserInfo({
+        userStore.setToken(data.token);
+        userStore.setUserInfo({
             avatarUrl: data.avatarUrl,
             nickname: data.nickname,
             roles: data.role,
