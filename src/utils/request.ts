@@ -66,8 +66,6 @@ service.interceptors.response.use(
         case 403:
           // 禁止访问
           message.error('禁止访问');
-          // 跳转回首页
-          window.location.href = window.location.origin + '/#/login';
           // 清掉pinia的token
           useUserStore().setToken('');
           break;
