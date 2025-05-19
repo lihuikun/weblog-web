@@ -5,7 +5,7 @@ interface UserState {
     userInfo: {
         id?: string
         username?: string
-        avatar?: string
+        avatarUrl?: string
         roles: string[]
         [key: string]: any
     } | null

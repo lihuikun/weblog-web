@@ -97,8 +97,8 @@ watch(route, () => {
 const year = new Date().getFullYear()
 
 // 获取用户信息
-const userInfo = computed(() => userStore.userInfo || { nickname: '', avatar: '' });
-const avatarUrl = computed(() => userInfo.value?.avatar || '');
+const userInfo = computed(() => userStore.userInfo || { nickname: '', avatarUrl: '' });
+const avatarUrl = computed(() => userInfo.value?.avatarUrl || '');
 const username = computed(() => userInfo.value?.nickname || 'U');
 const userFirstLetter = computed(() => {
     if (!username.value) return 'U';
