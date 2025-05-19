@@ -143,6 +143,9 @@ async function handleGithubCallback() {
         });
         message.success('登录成功');
         // 跳转回首页去掉code
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('code');
+        window.history.replaceState(null, '', cleanUrl.toString());
         router.push('/');
     }
 }
