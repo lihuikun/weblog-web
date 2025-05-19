@@ -64,6 +64,9 @@ service.interceptors.response.use(
           break;
         case 403:
           // 禁止访问
+          message.error('禁止访问');
+          // 跳转回首页
+          window.location.href = window.location.origin + '/';
           break;
         case 404:
           // 资源不存在
