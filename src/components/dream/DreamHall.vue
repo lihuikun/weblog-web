@@ -2,8 +2,11 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { message, Tag, Button, Card, Modal } from 'ant-design-vue'
+import { RobotOutlined } from '@ant-design/icons-vue'
 import { getDreamHall, createDream, CreateDreamParams, deleteDream } from '@/api/dream'
 import DreamForm from './components/DreamForm.vue'
+import DreamAnalysisModal from './components/DreamAnalysisModal.vue'
+import { useUserStore } from '@/stores/userStore'
 
 const router = useRouter()
 const dreams = ref<any[]>([])
@@ -19,7 +22,7 @@ const loadingMore = ref(false) // 加载更多状态
 
 // 检查登录
 function checkLogin() {
-    const token = localStorage.getItem('token')
+    const token = useUserStore().token
     if (!token) {
         message.warning('请先登录')
         router.push('/login')
@@ -184,6 +187,18 @@ async function handleDelete(id: string) {
         message.error('梦境删除失败')
     }
 }
+
+// AI分析相关
+const showAnalysisModal = ref(false)
+const currentAnalyzeDream = ref<any>({})
+
+// 打开AI分析对话框
+function handleAnalyze(dream: any) {
+    if (!checkLogin()) return
+    currentAnalyzeDream.value = dream
+    showAnalysisModal.value = true
+}
+
 onMounted(() => {
     fetchDreams()
 })
@@ -198,40 +213,51 @@ onMounted(() => {
 
         <div class="overflow-y-auto flex-1 dream-list scrollbar-hide" @scroll="handleScroll">
             <a-spin :spinning="loading">
-                <div class="flex flex-col pb-4 space-y-4">
-                    <Card v-for="dream in dreams" :key="dream.id" class="w-full dream-card" :title="dream.title"
-                        hoverable>
+                <div class="grid grid-cols-1 gap-4">
+                    <Card v-for="dream in dreams" :key="dream.id" class="dream-card" :title="dream.title">
                         <template #extra>
-                            <span class="dream-date">{{ new Date(dream.createTime).toLocaleDateString() }}</span>
-                            <!-- 删除按钮 -->
-                            <AButton v-permission="'admin'" type="link" @click="handleDelete(dream.id)">删除</AButton>
+                            <div class="flex gap-2">
+                                <!-- AI分析按钮 -->
+                                <Button v-if="dream.id" type="text" shape="circle" @click="handleAnalyze(dream)">
+                                    <template #icon>
+                                        <RobotOutlined />
+                                    </template>
+                                </Button>
+                            </div>
                         </template>
 
                         <div class="dream-content">{{ dream.content }}</div>
 
-                        <div class="dream-meta">
-                            <span class="dream-mood">
-                                心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
-                            </span>
-                            <div class="dream-tags">
+                        <div class="flex justify-between items-center dream-meta">
+                            <div>
+                                <span class="dream-mood">
+                                    心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
+                                </span>
+                                <span class="ml-2 text-gray-500">
+                                    {{ new Date(dream.createTime).toLocaleDateString() }}
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-1">
                                 <Tag v-for="tag in dream.tags" :key="tag" :color="getTagColor(tag)">
                                     {{tagOptions.find(t => t.value === tag)?.label || tag}}
                                 </Tag>
                             </div>
                         </div>
                     </Card>
-
-                    <!-- 加载更多状态 -->
-                    <div v-if="loadingMore" class="flex justify-center py-4">
-                        <a-spin />
-                    </div>
-
-                    <!-- 无更多数据 -->
-                    <div v-if="!hasMore && dreams.length > 0" class="py-4 text-center text-gray-400">
-                        已经到底啦 ~
-                    </div>
                 </div>
 
+                <!-- 加载更多状态 -->
+                <div v-if="loadingMore" class="flex justify-center py-4">
+                    <a-spin />
+                </div>
+
+                <!-- 无更多数据 -->
+                <div v-if="!hasMore && dreams.length > 0" class="py-4 text-center text-gray-400">
+                    已经到底啦 ~
+                </div>
+
+                <!-- 无梦境数据提示 -->
                 <div v-if="!dreams.length && !loading" class="empty-tip">
                     暂无梦境，快来创建吧！
                 </div>
@@ -243,6 +269,9 @@ onMounted(() => {
             @cancel="handleCancel">
             <DreamForm ref="formRef" v-model:formState="formState" :title="'创建梦境'" :submitting="submitting" />
         </Modal>
+
+        <!-- AI分析对话框 -->
+        <DreamAnalysisModal v-model:visible="showAnalysisModal" :dream="currentAnalyzeDream" />
     </div>
 </template>
 

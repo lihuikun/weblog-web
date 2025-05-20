@@ -1,6 +1,7 @@
 // 旧的请求方式,没有加解密
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { message } from 'ant-design-vue';
+import { useUserStore } from '@/stores/userStore'
 
 console.log("🚀 ~ import.meta.env:", import.meta.env)
 // 创建 axios 实例
@@ -16,7 +17,7 @@ const service: AxiosInstance = axios.create({
 service.interceptors.request.use(
   (config) => {
     // 在请求发送之前做一些处理，例如添加 token
-    const token = localStorage.getItem('token');
+    const token = useUserStore().token
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }

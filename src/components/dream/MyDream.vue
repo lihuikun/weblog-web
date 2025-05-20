@@ -2,10 +2,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message, Tag, Button, Card, Modal, Popconfirm } from 'ant-design-vue'
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, DeleteOutlined, PlusOutlined, RobotOutlined } from '@ant-design/icons-vue'
 import { getMyDreams, createDream, updateDream, deleteDream, CreateDreamParams } from '@/api/dream'
 import DreamForm from './components/DreamForm.vue'
-
+import DreamAnalysisModal from './components/DreamAnalysisModal.vue'
+import { useUserStore } from '@/stores/userStore'
 const router = useRouter()
 const dreams = ref<any[]>([])
 const loading = ref(false)
@@ -20,7 +21,7 @@ const loadingMore = ref(false) // 加载更多状态
 
 // 检查登录
 function checkLogin() {
-    const token = localStorage.getItem('token')
+    const token = useUserStore().token
     if (!token) {
         message.warning('请先登录')
         router.push('/login')
@@ -230,6 +231,17 @@ function getTagColor(tag: string): string {
     return colorMap[tag] || 'blue'
 }
 
+// AI分析相关
+const showAnalysisModal = ref(false)
+const currentAnalyzeDream = ref<any>({})
+
+// 打开AI分析对话框
+function handleAnalyze(dream: any) {
+    if (!checkLogin()) return
+    currentAnalyzeDream.value = dream
+    showAnalysisModal.value = true
+}
+
 onMounted(() => {
     fetchMyDreams()
 })
@@ -266,6 +278,12 @@ onMounted(() => {
                                         </template>
                                     </Button>
                                 </Popconfirm>
+                                <!-- AI分析按钮 -->
+                                <Button v-if="dream.id" type="text" shape="circle" @click="handleAnalyze(dream)">
+                                    <template #icon>
+                                        <RobotOutlined />
+                                    </template>
+                                </Button>
                             </div>
                         </template>
 
@@ -312,6 +330,9 @@ onMounted(() => {
             <DreamForm ref="formRef" v-model:formState="formState" :title="isEdit ? '编辑梦境' : '创建梦境'" :is-edit="isEdit"
                 :submitting="submitting" />
         </Modal>
+
+        <!-- AI分析对话框 -->
+        <DreamAnalysisModal v-model:visible="showAnalysisModal" :dream="currentAnalyzeDream" />
     </div>
 </template>
 

@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    DreamAnalysisModal: typeof import('./src/components/dream/components/DreamAnalysisModal.vue')['default']
     DreamForm: typeof import('./src/components/dream/components/DreamForm.vue')['default']
     DreamHall: typeof import('./src/components/dream/DreamHall.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']

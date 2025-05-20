@@ -1,6 +1,4 @@
 import request from '@/utils/request';
-import type { FormState, RegisterFormState, ResetFormState } from '@/types/form';
-
 
 // 获取梦境大厅数据
 export function getDreamHall(params?: { page?: number; pageSize?: number }) {
@@ -22,11 +20,12 @@ export function getMyDreams(params?: { page?: number; pageSize?: number }) {
 
 // 创建梦境
 export interface CreateDreamParams {
-    title: string;
-    content: string;
-    emotion: string;
-    tags: string[];
-    isShared: boolean;
+    title?: string;
+    content?: string;
+    emotion?: string;
+    tags?: string[];
+    isShared?: boolean;
+    interpretation?: string;
 }
 
 export function createDream(data: CreateDreamParams) {
@@ -52,4 +51,13 @@ export function updateDream(id: string, data: Partial<CreateDreamParams>) {
         method: 'patch',
         data,
     });
-} 
+}
+
+// AI分析梦境
+export function analyzeDream(id: string) {
+    return request({
+        url: `/dream/analyze/${id}`,
+        method: 'post',
+    });
+}
+
