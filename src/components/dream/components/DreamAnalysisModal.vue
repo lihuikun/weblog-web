@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch } from 'vue'
-import { Modal, Spin, Input, message, Button } from 'ant-design-vue'
+import { ref, defineProps, defineEmits, watch, computed } from 'vue'
+import { Modal, Spin, message, Button } from 'ant-design-vue'
 import { analyzeDream, updateDream } from '@/api/dream'
+import { useUserStore } from '@/stores/userStore'
+import { MdEditor, MdPreview } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
+import 'md-editor-v3/lib/preview.css'
 
 const props = defineProps<{
     dream: any
@@ -17,6 +21,9 @@ const analysisContent = ref('')
 const isEditing = ref(false)
 const editContent = ref('')
 const submitting = ref(false)
+
+const userStore = useUserStore()
+const isAdmin = computed(() => userStore.roles?.includes('admin'))
 
 // 获取AI分析结果
 async function fetchAnalysis() {
@@ -36,13 +43,6 @@ async function fetchAnalysis() {
     }
 }
 
-// 切换到编辑模式
-function toggleEdit() {
-    isEditing.value = !isEditing.value
-    if (isEditing.value) {
-        editContent.value = analysisContent.value
-    }
-}
 
 // 保存编辑内容
 async function saveEdit() {
@@ -52,12 +52,10 @@ async function saveEdit() {
     await updateDream(props.dream.id, { interpretation: editContent.value })
     analysisContent.value = editContent.value
     message.success('分析内容已更新')
-    isEditing.value = false
 }
 
 // 取消编辑
 function cancelEdit() {
-    isEditing.value = false
     editContent.value = analysisContent.value
 }
 
@@ -86,30 +84,32 @@ watch(() => [props.visible, props.dream.id], ([visible, id]) => {
 </script>
 
 <template>
-    <Modal v-model:open="visible" title="AI梦境分析" :width="600" @cancel="handleClose" :footer="null">
+    <Modal v-model:open="visible" title="AI梦境分析" width="80%" @cancel="handleClose" :footer="null">
         <Spin :spinning="loading">
             <div class="analysis-content">
-                <!-- 分析内容展示区 -->
-                <div v-if="!isEditing" class="analysis-display">
-                    <div class="analysis-text">{{ analysisContent }}</div>
-
-                    <!-- admin可编辑的按钮 -->
-                    <div class="flex justify-end mt-4">
-                        <Button v-permission="'admin'" type="primary" @click="toggleEdit">
-                            编辑分析
-                        </Button>
+                <!-- 非admin只读预览 -->
+                <div v-if="!isAdmin">
+                    <MdPreview :model-value="analysisContent" />
+                    <div v-if="!props.dream.interpretation" class="flex justify-end mt-4">
+                        <Button type="primary" :loading="loading" @click="fetchAnalysis">AI分析</Button>
                     </div>
                 </div>
-
-                <!-- 编辑模式 -->
-                <div v-else class="analysis-edit">
-                    <Input.TextArea v-model:value="editContent" :rows="8" placeholder="请输入分析内容" />
-
-                    <div class="flex justify-end mt-4 space-x-2">
-                        <Button @click="cancelEdit">取消</Button>
-                        <Button type="primary" :loading="submitting" @click="saveEdit">
-                            保存
-                        </Button>
+                <!-- admin可编辑 -->
+                <div v-else>
+                    <div v-if="!props.dream.interpretation">
+                        <div class="flex mt-4">
+                            <Button type="primary" :loading="loading" @click="fetchAnalysis">AI分析</Button>
+                        </div>
+                        <div class="py-8 text-center text-gray-400">暂无分析结果</div>
+                    </div>
+                    <div v-else>
+                        <MdEditor v-model="editContent"
+                            :toolbars="['bold', 'italic', 'strikeThrough', 'title', 'quote', 'unorderedList', 'orderedList', 'link', 'image', 'code', 'table', 'save']"
+                            class="mb-4" height="300px" />
+                        <div class="flex justify-end mt-4 space-x-2">
+                            <Button @click="cancelEdit">取消</Button>
+                            <Button type="primary" :loading="submitting" @click="saveEdit">保存</Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -120,16 +120,6 @@ watch(() => [props.visible, props.dream.id], ([visible, id]) => {
 <style scoped>
 .analysis-content {
     min-height: 200px;
-    padding: 16px;
-}
-
-.analysis-text {
-    font-size: 16px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-}
-
-.analysis-edit {
-    margin-top: 12px;
+    padding: 5px;
 }
 </style>

@@ -205,60 +205,63 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex flex-col h-full bg-white dream-hall-container">
-        <div class="dream-hall-header">
-            <h1>梦境大厅</h1>
-            <Button type="primary" @click="handleCreate">创建梦境</Button>
+    <div class="p-4 w-full h-full">
+        <!-- 标题栏 -->
+        <div class="flex justify-between items-center pb-4 mb-6 border-b">
+            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
+                梦境大厅
+            </h1>
+            <Button type="primary" @click="handleCreate" class="!rounded-full !px-6 !font-semibold">
+                创建梦境
+            </Button>
         </div>
 
-        <div class="overflow-y-auto flex-1 dream-list scrollbar-hide" @scroll="handleScroll">
+        <!-- 梦境列表 -->
+        <div class="overflow-y-auto flex-1" @scroll="handleScroll">
             <a-spin :spinning="loading">
-                <div class="grid grid-cols-1 gap-4">
-                    <Card v-for="dream in dreams" :key="dream.id" class="dream-card" :title="dream.title">
-                        <template #extra>
-                            <div class="flex gap-2">
-                                <!-- AI分析按钮 -->
-                                <Button v-if="dream.id" type="text" shape="circle" @click="handleAnalyze(dream)">
-                                    <template #icon>
-                                        <RobotOutlined />
-                                    </template>
-                                </Button>
-                            </div>
-                        </template>
-
-                        <div class="dream-content">{{ dream.content }}</div>
-
-                        <div class="flex justify-between items-center dream-meta">
+                <div class="flex flex-col gap-4">
+                    <div v-for="dream in dreams" :key="dream.id"
+                        class="flex flex-col gap-3 p-6 w-full bg-gray-50 rounded-xl shadow transition hover:shadow-xl">
+                        <!-- 标题和AI分析 -->
+                        <div class="flex justify-between items-center">
+                            <div class="text-lg font-semibold truncate">{{ dream.title }}</div>
+                            <Button v-if="dream.id" type="text" shape="circle" @click="handleAnalyze(dream)"
+                                class="!text-blue-500 flex items-center justify-center">
+                                <template #icon>
+                                    <img src="@/assets/icons/ai.png" class="w-6" />
+                                </template>
+                            </Button>
+                        </div>
+                        <!-- 内容 -->
+                        <div class="text-gray-700 text-base line-clamp-4 min-h-[64px]">
+                            {{ dream.content }}
+                        </div>
+                        <!-- 心情/日期/标签 -->
+                        <div class="flex flex-wrap gap-2 justify-between items-center text-sm text-gray-500">
                             <div>
-                                <span class="dream-mood">
+                                <span class="px-2 py-0.5 mr-2 font-medium text-purple-600 bg-purple-50 rounded">
                                     心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
                                 </span>
-                                <span class="ml-2 text-gray-500">
-                                    {{ new Date(dream.createTime).toLocaleDateString() }}
+                                <span>{{ new Date(dream.createTime).toLocaleDateString() }}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1">
+                                <span v-for="tag in dream.tags" :key="tag"
+                                    class="px-2 py-0.5 text-xs font-medium text-blue-600 bg-blue-100 rounded">
+                                    {{tagOptions.find(t => t.value === tag)?.label || tag}}
                                 </span>
                             </div>
-
-                            <div class="flex flex-wrap gap-1">
-                                <Tag v-for="tag in dream.tags" :key="tag" :color="getTagColor(tag)">
-                                    {{tagOptions.find(t => t.value === tag)?.label || tag}}
-                                </Tag>
-                            </div>
                         </div>
-                    </Card>
+                    </div>
                 </div>
 
-                <!-- 加载更多状态 -->
+                <!-- 加载更多/无更多数据 -->
                 <div v-if="loadingMore" class="flex justify-center py-4">
                     <a-spin />
                 </div>
-
-                <!-- 无更多数据 -->
-                <div v-if="!hasMore && dreams.length > 0" class="py-4 text-center text-gray-400">
+                <div v-if="!hasMore && dreams.length > 0" class="py-6 text-center text-gray-400">
                     已经到底啦 ~
                 </div>
-
-                <!-- 无梦境数据提示 -->
-                <div v-if="!dreams.length && !loading" class="empty-tip">
+                <div v-if="!dreams.length && !loading" class="py-16 text-center text-gray-400">
                     暂无梦境，快来创建吧！
                 </div>
             </a-spin>
@@ -274,110 +277,3 @@ onMounted(() => {
         <DreamAnalysisModal v-model:visible="showAnalysisModal" :dream="currentAnalyzeDream" />
     </div>
 </template>
-
-<style scoped>
-.dream-hall-container {
-    max-width: 900px;
-    margin: 0 auto;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
-    padding: 32px 24px;
-}
-
-.dream-hall-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 16px;
-}
-
-.dream-hall-header h1 {
-    font-size: 24px;
-    color: #333;
-    margin: 0;
-    font-weight: 600;
-    background: linear-gradient(45deg, #1890ff, #722ed1);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-}
-
-.dream-list {
-    width: 100%;
-}
-
-.dream-card {
-    width: 100%;
-}
-
-.dream-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.dream-content {
-    font-size: 15px;
-    margin-bottom: 16px;
-    color: #333;
-    line-height: 1.6;
-    max-height: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-}
-
-.dream-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.dream-mood {
-    color: #722ed1;
-    font-weight: 500;
-    padding: 2px 6px;
-    background: #f9f0ff;
-    border-radius: 4px;
-    font-size: 13px;
-}
-
-.dream-tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.dream-date {
-    color: #999;
-    font-size: 13px;
-}
-
-.empty-tip {
-    text-align: center;
-    color: #bbb;
-    margin: 48px 0;
-    font-size: 16px;
-    grid-column: 1 / -1;
-    padding: 40px;
-    background: #f9f9f9;
-    border-radius: 8px;
-}
-
-@media (max-width: 768px) {
-    .dream-hall-container {
-        padding: 20px 16px;
-        margin: 0;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
-    .dream-hall-header {
-        margin-bottom: 20px;
-    }
-}
-</style>

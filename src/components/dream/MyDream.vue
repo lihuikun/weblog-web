@@ -252,9 +252,6 @@ onMounted(() => {
         <div class="my-dream-header">
             <h1>我的梦境</h1>
             <Button type="primary" @click="handleCreate">
-                <template #icon>
-                    <PlusOutlined />
-                </template>
                 创建梦境
             </Button>
         </div>

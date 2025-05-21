@@ -366,7 +366,7 @@ onBeforeUnmount(() => {
 
                     <!-- 内容区域 -->
                     <div ref="contentRef"
-                        class="overflow-y-auto px-6 h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1">
+                        class="overflow-y-auto px-6 h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1 shadow-lg ml-[10px] rounded-lg">
                         <slot :sideMenuId="sideMenuId" />
                     </div>
 
