@@ -83,13 +83,13 @@ const columns = [
     },
     {
         title: '更新时间',
-        dataIndex: 'updateTime',
-        key: 'updateTime',
+        dataIndex: 'updatedTime',
+        key: 'updatedTime',
         width: 120,
         customRender: ({ record }: any) => {
             return (
                 <div>
-                    {formatDate(record.createTime, 'time')}
+                    {formatDate(record.updatedTime, 'time')}
                 </div>
             )
         }
