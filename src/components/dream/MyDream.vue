@@ -7,10 +7,15 @@ import { getMyDreams, createDream, updateDream, deleteDream, CreateDreamParams }
 import DreamForm from './components/DreamForm.vue'
 import DreamAnalysisModal from './components/DreamAnalysisModal.vue'
 import { useUserStore } from '@/stores/userStore'
+import { useDateFormatter } from '@/hooks/useDateFormatter'
+
 const router = useRouter()
 const dreams = ref<any[]>([])
 const loading = ref(false)
 const formRef = ref()
+
+// 日期格式化hooks
+const { formatDate } = useDateFormatter()
 
 // 分页相关
 const page = ref(1)
@@ -288,10 +293,9 @@ onMounted(() => {
 
                         <div class="dream-footer">
                             <div class="dream-info">
-                                <span class="dream-mood">
-                                    心情：{{moodOptions.find(m => m.value === dream.emotion)?.label || dream.emotion}}
-                                </span>
-                                <span class="dream-date">{{ new Date(dream.createTime).toLocaleDateString() }}</span>
+                                <span class="dream-mood"> 心情：{{moodOptions.find(m => m.value === dream.emotion)?.label
+                                    || dream.emotion}}
+                                </span> <span class="dream-date">{{ formatDate(dream.createTime) }}</span>
                             </div>
 
                             <div class="dream-tags">

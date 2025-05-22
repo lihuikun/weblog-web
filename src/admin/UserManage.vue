@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { message, Button, Popconfirm } from 'ant-design-vue'
 import { getUserList, deleteUser, updateUserPartial } from '@/api/user'
+import { useDateFormatter } from '@/hooks/useDateFormatter'
 const users = ref([])
 const loading = ref(false)
 const page = ref(1)
@@ -10,7 +11,8 @@ const total = ref(0)
 const editingUser = ref<any>(null)
 const showEditModal = ref(false)
 const editForm = ref<any>({})
-
+// 日期格式化hooks
+const { formatDate } = useDateFormatter()
 const fetchUsers = async () => {
     loading.value = true
     const { data } = await getUserList({ page: page.value, pageSize: pageSize.value })
@@ -37,6 +39,7 @@ const handleUpdate = async () => {
 }
 const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
+    { title: 'openId', dataIndex: 'openId', key: 'openId', width: 80 },
     { title: '用户名', dataIndex: 'nickname', key: 'nickname', width: 120 },
     { title: '邮箱', dataIndex: 'email', key: 'email', width: 180 },
     {
@@ -48,6 +51,45 @@ const columns = [
             return (
                 <div>
                     {roleList.find((item: any) => item.value === record.role)?.label}
+                </div>
+            )
+        }
+    },
+    {
+        title: '注册方式',
+        dataIndex: 'registerType',
+        key: 'registerType',
+        width: 120,
+        customRender: ({ record }: any) => {
+            return (
+                <div>
+                    {registerTypeList.find((item: any) => item.value === record.loginType)?.label}
+                </div>
+            )
+        }
+    },
+    {
+        title: '注册时间',
+        dataIndex: 'createTime',
+        key: 'createTime',
+        width: 120,
+        customRender: ({ record }: any) => {
+            return (
+                <div>
+                    {formatDate(record.createTime, 'time')}
+                </div>
+            )
+        }
+    },
+    {
+        title: '更新时间',
+        dataIndex: 'updateTime',
+        key: 'updateTime',
+        width: 120,
+        customRender: ({ record }: any) => {
+            return (
+                <div>
+                    {formatDate(record.createTime, 'time')}
                 </div>
             )
         }
@@ -82,6 +124,25 @@ const roleList = [
         label: '用户',
     },
 ]
+const registerTypeList =
+    [
+        {
+            value: 'email',
+            label: '邮箱',
+        },
+        {
+            value: 'mini',
+            label: '微信小程序',
+        },
+        {
+            value: 'official',
+            label: '微信公众号',
+        },
+        {
+            value: 'github',
+            label: 'GitHub',
+        }
+    ]
 onMounted(fetchUsers)
 </script>
 
