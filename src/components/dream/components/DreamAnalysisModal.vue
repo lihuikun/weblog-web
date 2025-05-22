@@ -102,7 +102,7 @@ watch(() => [props.visible, props.dream.id], ([visible, id]) => {
                         </div>
                         <div class="py-8 text-center text-gray-400">暂无分析结果</div>
                     </div>
-                    <div v-else>
+                    <div>
                         <MdEditor v-model="editContent"
                             :toolbars="['bold', 'italic', 'strikeThrough', 'title', 'quote', 'unorderedList', 'orderedList', 'link', 'image', 'code', 'table', 'save']"
                             class="mb-4" height="300px" />
