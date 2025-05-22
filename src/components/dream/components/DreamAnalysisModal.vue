@@ -31,12 +31,11 @@ async function fetchAnalysis() {
 
     loading.value = true
     try {
-        const res = await analyzeDream(props.dream.id)
-        analysisContent.value = res.data?.analysis || '暂无分析结果'
+        const { data } = await analyzeDream(props.dream.id)
+        console.log("🚀 ~ fetchAnalysis ~ data:", data)
+        analysisContent.value = data?.interpretation || '暂无分析结果'
         editContent.value = analysisContent.value
     } catch (error) {
-        console.error('获取分析失败', error)
-        message.error('获取分析结果失败')
         analysisContent.value = '获取分析结果失败'
     } finally {
         loading.value = false
@@ -52,11 +51,14 @@ async function saveEdit() {
     await updateDream(props.dream.id, { interpretation: editContent.value })
     analysisContent.value = editContent.value
     message.success('分析内容已更新')
+    submitting.value = false
+    emit('update:visible', false)
 }
 
 // 取消编辑
 function cancelEdit() {
     editContent.value = analysisContent.value
+    emit('update:visible', false)
 }
 
 // 关闭模态框
