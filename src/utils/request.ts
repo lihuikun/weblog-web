@@ -8,7 +8,7 @@ console.log("🚀 ~ import.meta.env:", import.meta.env)
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: '/api',
-  timeout: 15000,
+  timeout: 3000000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8',
   },
