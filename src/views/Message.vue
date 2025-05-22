@@ -151,8 +151,6 @@ function getFormattedDate(dateString: string) {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
     })
 }
 const { sideMenuId } = defineProps<{ sideMenuId: string[] }>();
@@ -232,7 +230,7 @@ async function handlePublishMessage() {
                             <template #description>
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm text-gray-400 message-time">{{ getFormattedDate(item.createdAt)
-                                        }}</span>
+                                    }}</span>
                                     <div class="message-actions">
                                         <Tag v-if="item.isRead" color="green">
                                             已读
