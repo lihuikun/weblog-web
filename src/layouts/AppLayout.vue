@@ -12,6 +12,7 @@ import logo from '@/assets/logo.jpg';
 import { logout } from '@/api/auth';
 import { getUnreadCount } from '@/api/message';
 import { useUserStore } from '@/stores/userStore';
+import UserDropdown from '@/components/UserDropdown.vue';
 
 const themeStore = useThemeStore();
 const userStore = useUserStore();
@@ -110,16 +111,6 @@ const isLoggedIn = computed(() => {
     return !!userStore.token;
 });
 
-// 添加退出登录方法
-const handleLogout = async () => {
-    try {
-        userStore.setToken('');
-        message.success('退出登录成功');
-        router.push('/login');
-    } catch (error: any) {
-        message.error(error.message || '退出失败');
-    }
-};
 function handleMenuClick(key: string) {
     console.log("🚀 ~ handleMenuClick ~ key:", key, contentRef.value)
     // 内容容器滚动到顶部
@@ -240,21 +231,8 @@ onBeforeUnmount(() => {
 
                         <!-- 根据登录状态显示不同的内容 -->
                         <template v-if="isLoggedIn">
-                            <a-dropdown>
-                                <a-avatar v-if="avatarUrl" :src="avatarUrl" :size="36" />
-                                <a-avatar v-else :size="36" style="background-color: #1890ff">
-                                    {{ userFirstLetter }}
-                                </a-avatar>
-                                <template #overlay>
-                                    <a-menu>
-                                        <a-menu-item key="1">我的主页</a-menu-item>
-                                        <a-menu-item key="2">我的收藏</a-menu-item>
-                                        <a-menu-item key="3">我的设置</a-menu-item>
-                                        <a-menu-divider />
-                                        <a-menu-item key="4" @click="handleLogout">退出登录</a-menu-item>
-                                    </a-menu>
-                                </template>
-                            </a-dropdown>
+                            <UserDropdown :avatarUrl="avatarUrl" :username="username"
+                                :userFirstLetter="userFirstLetter" />
                         </template>
                         <template v-else>
                             <div class="space-x-2">
@@ -306,21 +284,8 @@ onBeforeUnmount(() => {
                                 </a-button>
                             </a-badge>
 
-                            <a-dropdown>
-                                <a-avatar v-if="avatarUrl" :src="avatarUrl" :size="28" />
-                                <a-avatar v-else :size="28" style="background-color: #1890ff">
-                                    {{ userFirstLetter }}
-                                </a-avatar>
-                                <template #overlay>
-                                    <a-menu>
-                                        <a-menu-item key="1">我的主页</a-menu-item>
-                                        <a-menu-item key="2">我的收藏</a-menu-item>
-                                        <a-menu-item key="3">我的设置</a-menu-item>
-                                        <a-menu-divider />
-                                        <a-menu-item key="4" @click="handleLogout">退出登录</a-menu-item>
-                                    </a-menu>
-                                </template>
-                            </a-dropdown>
+                            <UserDropdown :avatarUrl="avatarUrl" :username="username"
+                                :userFirstLetter="userFirstLetter" />
                         </template>
                         <template v-else>
                             <div class="space-x-2">

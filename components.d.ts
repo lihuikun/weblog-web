@@ -15,5 +15,6 @@ declare module 'vue' {
     MyDream: typeof import('./src/components/dream/MyDream.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UserDropdown: typeof import('./src/components/UserDropdown.vue')['default']
   }
 }

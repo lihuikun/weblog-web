@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import publicRoutes from './public-routes';
+import adminRoutes from './admin-routes';
 import { message } from 'ant-design-vue';
 import { useUserStore } from '@/stores/userStore';
 
@@ -133,7 +134,7 @@ const notFoundRoute: RouteRecordRaw = {
 };
 
 // 合并所有路由
-const routes = [...publicRoutes, ...mainRoutes, notFoundRoute];
+const routes = [...publicRoutes, ...mainRoutes, ...adminRoutes, notFoundRoute];
 
 // 创建路由实例
 const router = createRouter({
@@ -156,6 +157,18 @@ router.beforeEach((to, from, next) => {
         query: { redirect: to.fullPath } // 保存要跳转的路由
       });
       return;
+    }
+
+    // 检查角色权限
+    const requiredRoles = to.meta.roles;
+    console.log("🚀 ~ router.beforeEach ~ requiredRoles:", requiredRoles)
+    if (requiredRoles && Array.isArray(requiredRoles) && requiredRoles.length > 0) {
+      const hasPermission = requiredRoles.some(role => userStore.roles.includes(role));
+      if (!hasPermission) {
+        message.warning('您没有访问权限');
+        next('/');
+        return;
+      }
     }
   }
   next();

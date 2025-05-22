@@ -6,13 +6,14 @@ import path from 'path'
 import AutoImport from "unplugin-auto-import/vite";
 import svgLoader from "vite-svg-loader";
 import { terser } from 'rollup-plugin-terser';
-
+import vueJsx from '@vitejs/plugin-vue-jsx'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
   console.log(env)
   return {
     plugins: [
       vue(),
+      vueJsx(),
       AutoImport({
         imports: ["vue"],
         dts: "src/auto-imports.d.ts", // 指定生成的类型声明文件路径
