@@ -140,7 +140,7 @@ function handleMessageClick(item: MessageItem) {
 
     // 如果有跳转链接，则跳转
     if (item.redirectUrl) {
-        window.open(item.redirectUrl, '_blank')
+        router.push(item.redirectUrl)
     }
 }
 
@@ -232,7 +232,7 @@ async function handlePublishMessage() {
                             <template #description>
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm text-gray-400 message-time">{{ getFormattedDate(item.createdAt)
-                                    }}</span>
+                                        }}</span>
                                     <div class="message-actions">
                                         <Tag v-if="item.isRead" color="green">
                                             已读
