@@ -53,7 +53,7 @@ const userFirstLetter = computed(() => {
         <div class="flex justify-between items-center px-8 h-16 bg-white shadow">
             <div class="flex gap-3 items-center">
                 <img :src="logo" class="w-10 h-10 rounded" />
-                <span class="ml-4 text-xl font-bold text-white">后台管理</span>
+                <span class="ml-4 text-xl font-bold text-white">管理后台</span>
             </div>
             <div class="flex gap-4 items-center">
                 <span class="font-medium">{{ username }}</span>
@@ -64,7 +64,7 @@ const userFirstLetter = computed(() => {
         <!-- 主体 -->
         <div class="flex flex-1 min-h-0">
             <!-- 左侧菜单栏 -->
-            <div class="flex flex-col px-2 py-6 w-56 bg-white border-r">
+            <div class="flex flex-col px-2 py-6 w-56 bg-white border-r-0">
                 <AMenu mode="inline" :selectedKeys="selectedKeys">
                     <AMenuItem v-for="item in menuItems" :key="item.key" @click="() => handleMenuClick(item)">
                         {{ item.label }}
@@ -79,4 +79,9 @@ const userFirstLetter = computed(() => {
     </div>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped>
+/* 移除菜单栏右边框 */
+.ant-menu-inline {
+    border-right: none !important;
+}
+</style>
