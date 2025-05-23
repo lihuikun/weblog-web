@@ -1,21 +1,33 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { message } from 'ant-design-vue';
 import logo from '@/assets/logo.jpg';
 import UserDropdown from '@/components/UserDropdown.vue';
+import adminRoutes from '@/router/admin-routes';
 
 const router = useRouter();
 const userStore = useUserStore();
 const route = useRoute();
 
-const menuItems = [
-    { key: 'user', label: '用户管理', path: '/admin/user' },
-    // 可扩展更多后台菜单
-];
+// 从路由配置中动态获取管理员菜单项
+const menuItems = computed(() => {
+    return adminRoutes.map(route => ({
+        key: route.name as string,
+        label: route.meta?.title as string,
+        path: route.path
+    }));
+});
 
-const selectedKeys = ref<string[]>([menuItems[0].key]);
+const selectedKeys = ref<string[]>([]);
+
+// 根据当前路由设置选中的菜单项
+watch(() => route.name, (newRouteName) => {
+    if (newRouteName) {
+        selectedKeys.value = [newRouteName as string];
+    }
+}, { immediate: true });
 
 const handleMenuClick = (item: any) => {
     selectedKeys.value = [item.key];

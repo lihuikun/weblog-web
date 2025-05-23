@@ -21,6 +21,18 @@ const adminRoutes: Array<RouteRecordRaw> = [
             layout: 'admin'
         },
     },
+    {
+        path: '/admin/message-manage',
+        name: 'MessageManage',
+        component: () => import('@/admin/MessageManage.vue'),
+        meta: {
+            title: '消息管理',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin', 'subAdmin'],
+            layout: 'admin'
+        },
+    },
 ];
 
 export default adminRoutes; 

@@ -1,4 +1,55 @@
-import request from '@/utils/request';
+import request from '@/utils/request'
+
+// 消息类型
+export interface Message {
+    id: number
+    title: string
+    content: string
+    type: 'system' | 'notification'
+    isRead: boolean
+    createdAt: string
+    updateTime: string
+    userId?: number
+    sender?: {
+        id: number
+        nickname: string
+        email: string
+    }
+}
+
+// 分页参数
+export interface PaginationParams {
+    page: number
+    pageSize: number
+}
+
+// 获取所有消息参数
+export interface GetAllMessagesParams extends PaginationParams {
+    type?: string
+}
+
+// 更新消息参数
+export interface UpdateMessageDto {
+    title?: string
+    content?: string
+    type?: 'system' | 'notification'
+    isRead?: boolean
+}
+
+// 获取所有消息（管理后台）
+export function getAllMessages(params: GetAllMessagesParams) {
+    return request.get('/messages/all', { params })
+}
+
+// 更新消息（管理后台）
+export function updateMessage(messageId: number, data: UpdateMessageDto) {
+    return request.patch(`/messages/${messageId}`, data)
+}
+
+// 删除消息（管理后台）
+export function deleteMessage(messageId: number) {
+    return request.delete(`/messages/${messageId}`)
+}
 
 // 消息类型接口
 export interface MessageItem {
@@ -45,14 +96,6 @@ export function readAllMessages(params?: { type?: 'system' | 'notification' }) {
         url: '/messages/read-all',
         method: 'put',
         params
-    });
-}
-
-// 删除消息
-export function deleteMessage(id: string) {
-    return request({
-        url: `/messages/${id}`,
-        method: 'delete'
     });
 }
 
