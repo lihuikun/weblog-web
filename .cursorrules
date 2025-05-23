@@ -1,0 +1,258 @@
+# Vue 3 + TypeScript 项目开发规则
+
+## 技术栈
+- Vue 3 + Composition API
+- TypeScript
+- Ant Design Vue
+- Tailwind CSS
+- Vue Router 4
+- Pinia (状态管理)
+
+## 文件结构规范
+
+### 目录结构
+```
+src/
+├── admin/           # 管理后台页面
+├── views/           # 前台页面
+├── components/      # 公共组件
+├── layouts/         # 布局组件
+├── router/          # 路由配置
+├── api/             # API 接口
+├── hooks/           # 自定义 hooks
+├── stores/          # Pinia 状态管理
+├── utils/           # 工具函数
+└── assets/          # 静态资源
+```
+
+### 路由配置规范
+- 路由文件按模块分离：`admin-routes.ts`, `public-routes.ts`
+- 路由配置中使用 `meta.layout` 指定布局组件
+- 管理后台路由需要权限控制：`meta.roles`
+- 布局组件从路由配置动态生成菜单，不要手动维护菜单配置
+
+#### 路由配置示例
+```typescript
+{
+  path: '/admin/example',
+  name: 'ExampleManage',
+  component: () => import('@/admin/ExampleManage.vue'),
+  meta: {
+    title: '示例管理',
+    keepAlive: true,
+    requiresAuth: true,
+    roles: ['admin', 'subAdmin'],
+    layout: 'admin'
+  }
+}
+```
+
+## 编码规范
+
+### Vue 组件规范
+1. **使用 `<script setup lang="tsx">` 语法**
+2. **组件结构顺序**：
+   - 导入语句
+   - 响应式数据定义
+   - 计算属性和函数
+   - 生命周期钩子
+
+#### 组件示例
+```vue
+<script setup lang="tsx">
+import { ref, onMounted } from 'vue'
+import { message, Button } from 'ant-design-vue'
+import { getExampleList } from '@/api/example'
+
+const dataSource = ref([])
+const loading = ref(false)
+
+const fetchData = async () => {
+  loading.value = true
+  // 逻辑代码
+  loading.value = false
+}
+
+onMounted(() => {
+  fetchData()
+})
+</script>
+
+<template>
+  <!-- 模板内容 -->
+</template>
+```
+
+### 表格组件规范
+1. **使用 ATable 组件（不是 a-table）**
+2. **在 columns 配置中使用 customRender 渲染自定义内容**
+3. **使用 TSX 语法编写渲染函数**
+
+#### 表格配置示例
+```typescript
+const columns = [
+  {
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status',
+    width: 100,
+    customRender: ({ record }: { record: any }) => (
+      <Tag color={record.status === 'active' ? 'green' : 'red'}>
+        {record.status === 'active' ? '激活' : '禁用'}
+      </Tag>
+    )
+  },
+  {
+    title: '操作',
+    key: 'action',
+    width: 150,
+    fixed: 'right',
+    customRender: ({ record }: { record: any }) => (
+      <div>
+        <Button type="link" onClick={() => handleEdit(record)}>
+          编辑
+        </Button>
+        <Popconfirm
+          title="确定删除？"
+          onConfirm={() => handleDelete(record.id)}
+        >
+          <Button type="link" danger>删除</Button>
+        </Popconfirm>
+      </div>
+    )
+  }
+]
+```
+
+### 样式规范
+1. **优先使用 Tailwind CSS 类名**
+2. **组件库样式覆盖使用 `<style lang="scss" scoped>`**
+3. **布局使用 Flexbox（flex, flex-1, flex-col 等）**
+
+### API 接口规范
+1. **API 文件按模块分组**
+2. **统一使用 TypeScript 接口定义**
+3. **导出函数命名：动词 + 名词（如 getUserList, createUser）**
+
+#### API 示例
+```typescript
+import request from '@/utils/request'
+
+export interface User {
+  id: number
+  nickname: string
+  email: string
+}
+
+export function getUserList(params: PaginationParams) {
+  return request.get('/user/list', { params })
+}
+
+export function updateUser(id: number, data: Partial<User>) {
+  return request.patch(`/user/${id}`, data)
+}
+```
+
+## Hooks 使用规范
+
+### 现有 Hooks 沿用
+- `useDateFormatter` - 日期格式化
+- `useUserStore` - 用户状态管理
+
+### Hooks 命名规范
+- 以 `use` 开头
+- 使用驼峰命名法
+- 返回对象包含数据和方法
+
+## 布局规范
+
+### 布局组件
+- `AdminLayout` - 管理后台布局
+- `DefaultLayout` - 前台默认布局
+- 布局组件自动从路由配置生成菜单
+
+### 页面布局结构
+```vue
+<template>
+  <div class="flex p-6 h-full bg-white rounded-xl shadow">
+    <div class="flex-1">
+      <h2 class="mb-4 text-xl font-bold text-gray-800">页面标题</h2>
+      
+      <!-- 筛选区域 -->
+      <div class="p-4 mb-4 bg-gray-50 rounded-md">
+        <!-- 筛选内容 -->
+      </div>
+
+      <!-- 表格 -->
+      <div class="w-full">
+        <ATable
+          :scroll="{ x: true }"
+          class="w-full"
+          bordered
+        />
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+## 组件库使用规范
+
+### Ant Design Vue 组件
+- 使用大写字母开头的组件名：`ATable`, `AButton`, `AModal` 等
+- 表格使用 `bordered` 属性
+- 表格滚动设置：`:scroll="{ x: true }"` 确保不超出容器
+
+### 表单组件
+```vue
+<AModal v-model:open="modalVisible" title="编辑">
+  <AForm :model="formData">
+    <AFormItem label="名称">
+      <AInput v-model:value="formData.name" />
+    </AFormItem>
+    <AFormItem label="类型">
+      <ASelect v-model:value="formData.type" :options="typeOptions" />
+    </AFormItem>
+  </AForm>
+</AModal>
+```
+
+## 命名规范
+
+### 变量命名
+- 使用驼峰命名法
+- 布尔值以 `is`, `has`, `can`, `should` 开头
+- 数组/列表以复数形式命名
+
+### 函数命名
+- 事件处理函数：`handle` + 动作（如 `handleEdit`, `handleDelete`）
+- API 调用函数：动词 + 名词（如 `fetchUsers`, `createUser`）
+- 工具函数：动词开头（如 `formatDate`, `validateForm`）
+
+## 错误处理规范
+
+### API 错误处理
+```typescript
+try {
+  const res = await apiCall()
+  message.success('操作成功')
+} catch (error) {
+  console.error('操作失败:', error)
+  message.error('操作失败')
+}
+```
+
+## 注释规范
+- 复杂逻辑添加注释说明
+- API 接口添加 JSDoc 注释
+- 组件 props 使用 TypeScript 接口定义
+
+## 性能优化
+- 大列表使用虚拟滚动
+- 图片使用懒加载
+- 路由使用懒加载 `() => import()`
+- 合理使用 `computed` 和 `watch`
+
+---
+
+遵循以上规则可以确保代码风格一致，提高开发效率和代码可维护性。 
