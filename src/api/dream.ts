@@ -1,4 +1,6 @@
 import request from '@/utils/request';
+import { useUserStore } from '@/stores/userStore';
+import { createSSEStream, SSEController } from '@/utils/sse';
 
 // 获取梦境大厅数据
 export function getDreamHall(params?: { page?: number; pageSize?: number }) {
@@ -59,5 +61,21 @@ export function analyzeDream(id: string) {
         url: `/dream/analyze/${id}`,
         method: 'post',
     });
+}
+
+// AI分析梦境（流式）
+export async function analyzeDreamStream(
+    id: number,
+    onMessage: (content: string) => void,
+    onComplete: () => void,
+    onError: (error: any) => void
+): Promise<SSEController> {
+    return createSSEStream({
+        url: `/api/dream/analyze/${id}`,
+        method: 'POST',
+        onMessage,
+        onComplete,
+        onError
+    })
 }
 
