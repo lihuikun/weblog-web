@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/userStore'
-
+import { decryptData } from '@/utils/decrypt'
 export interface SSEOptions {
     url: string
     method?: 'GET' | 'POST'
@@ -12,114 +12,88 @@ export interface SSEOptions {
 export interface SSEController {
     cancel: () => void
 }
-
+const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY
 /**
  * 通用SSE流式请求工具
  * @param options SSE配置选项
  * @returns 返回可以取消流的控制器
  */
 export async function createSSEStream(options: SSEOptions): Promise<SSEController> {
-    const { url, method = 'POST', data, onMessage, onComplete, onError } = options
+    const { url, method = 'GET', data, onMessage, onComplete, onError } = options
 
     try {
         // 使用useUserStore来获取token
         const userStore = useUserStore()
 
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-            'Accept': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-        }
+        // 构建请求 URL，并添加 token 作为参数
+        const urlObj = new URL(url, window.location.origin)
 
-        // 如果有token，则添加Authorization头
+        // 添加 token 到 URL 参数（NestJS SSE 会使用这个进行身份验证）
         if (userStore.token) {
-            headers.Authorization = `Bearer ${userStore.token}`
+            urlObj.searchParams.append('token', userStore.token)
         }
 
-        const fetchOptions: RequestInit = {
-            method,
-            headers,
+        // 如果有 data 参数，添加到 URL 中
+        if (data) {
+            Object.entries(data).forEach(([key, value]) => {
+                urlObj.searchParams.append(key, String(value))
+            })
         }
 
-        // 如果是POST请求且有数据，添加请求体
-        if (method === 'POST' && data) {
-            fetchOptions.body = JSON.stringify(data)
-        }
+        // 创建 EventSource 实例
+        const eventSource = new EventSource(urlObj.toString())
 
-        const response = await fetch(url, fetchOptions)
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const reader = response.body?.getReader()
-        if (!reader) {
-            throw new Error('ReadableStream not supported')
-        }
-
-        const decoder = new TextDecoder()
-        let buffer = ''
-
-        // 创建一个可以取消的Promise
-        const readStream = async () => {
+        // 处理接收到的消息
+        eventSource.onmessage = (event) => {
             try {
-                while (true) {
-                    const { done, value } = await reader.read()
+                const parsedData = JSON.parse(event.data)
+                console.log("🚀 ~ eventSource.onmessage ~ parsedData:", parsedData)
 
-                    if (done) {
-                        onComplete()
-                        break
-                    }
+                // 处理完成信号
+                if (parsedData.data.done) {
+                    onComplete()
+                    eventSource.close()
+                    return
+                }
 
-                    // 解码数据块
-                    buffer += decoder.decode(value, { stream: true })
+                // 处理错误信号
+                if (parsedData.data.error) {
+                    onError(new Error(parsedData.error))
+                    eventSource.close()
+                    return
+                }
 
-                    // 处理SSE数据格式
-                    const lines = buffer.split('\n')
-                    buffer = lines.pop() || '' // 保留最后一个不完整的行
-
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const data = line.slice(6) // 移除 'data: ' 前缀
-
-                            // 检查是否完成
-                            if (data.trim() === '[DONE]') {
-                                onComplete()
-                                return
-                            }
-
-                            try {
-                                // 尝试解析JSON格式的数据
-                                const parsed = JSON.parse(data)
-                                if (parsed.content) {
-                                    onMessage(parsed.content)
-                                }
-                            } catch (parseError) {
-                                // 如果不是JSON格式，直接作为内容处理
-                                if (data.trim()) {
-                                    onMessage(data)
-                                }
-                            }
-                        }
-                    }
+                // 处理内容
+                if (parsedData.data.content) {
+                    onMessage(parsedData.data.content)
                 }
             } catch (error) {
-                onError(error)
-            } finally {
-                reader.releaseLock()
+                // 处理非 JSON 格式或其他解析错误
+                if (event.data && event.data !== '[DONE]') {
+                    onMessage(event.data)
+                }
+
+                // 处理结束标志
+                if (event.data === '[DONE]') {
+                    onComplete()
+                    eventSource.close()
+                }
             }
         }
 
-        readStream()
+        // 处理错误
+        eventSource.onerror = (error) => {
+            console.error('SSE 连接错误:', error)
+            onError(error)
+            eventSource.close()
+        }
 
-        // 返回一个可以取消流的函数
+        // 返回控制器
         return {
             cancel: () => {
-                reader.cancel()
-                reader.releaseLock()
+                eventSource.close()
             }
         }
-
     } catch (error) {
         onError(error)
         return {

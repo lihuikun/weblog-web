@@ -71,8 +71,9 @@ export async function analyzeDreamStream(
     onError: (error: any) => void
 ): Promise<SSEController> {
     return createSSEStream({
-        url: `/api/dream/analyze/${id}`,
-        method: 'POST',
+        url: `http://zhyqqkjerb.serv00.net:21904/dream/analyze/${id}`,
+        // url: `http://localhost:21904/dream/analyze/19`,
+        method: 'GET',
         onMessage,
         onComplete,
         onError

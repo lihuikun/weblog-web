@@ -59,7 +59,8 @@ async function fetchAnalysis() {
         streamController = await analyzeDreamStream(
             props.dream.id,
             // onMessage: 接收到新内容
-            (content: string) => {
+            (content: any) => {
+                console.log("🚀 ~ 1111111:", content)
                 streamingContent.value += content
                 // 每次更新内容后自动滚动
                 scrollToBottom()
