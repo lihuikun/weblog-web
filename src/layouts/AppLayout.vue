@@ -13,7 +13,8 @@ import { logout } from '@/api/auth';
 import { getUnreadCount } from '@/api/message';
 import { useUserStore } from '@/stores/userStore';
 import UserDropdown from '@/components/UserDropdown.vue';
-
+import { useDocumentVisibility, useIntervalFn } from '@vueuse/core'
+import { useVisibilityPolling } from '@/hooks/useVisibilityPolling';
 const themeStore = useThemeStore();
 const userStore = useUserStore();
 const router = useRouter();
@@ -134,51 +135,21 @@ const fetchUnreadCount = async () => {
     try {
         const res = await getUnreadCount();
         unreadCount.value = res.data || 0;
+        console.log('请求接口了')
     } catch (error) {
         console.error('获取未读消息数量失败', error);
     }
 };
+const { isActive } = useVisibilityPolling(fetchUnreadCount, 5000, true)
 
-// 开始轮询
-const startPolling = () => {
-    // 先立即执行一次
-    fetchUnreadCount();
-
-    // 设置10秒轮询
-    pollingTimer = window.setInterval(() => {
-        fetchUnreadCount();
-    }, 10000);
-};
-
-// 停止轮询
-const stopPolling = () => {
-    if (pollingTimer) {
-        clearInterval(pollingTimer);
-        pollingTimer = null;
-    }
-};
-
-// 监听登录状态变化
-watch(isLoggedIn, (newValue) => {
-    if (newValue) {
-        startPolling();
-    } else {
-        stopPolling();
-        unreadCount.value = 0;
-    }
-});
 
 // 组件挂载时启动轮询，卸载时停止轮询
 onMounted(() => {
     getPVTotal();
-    if (isLoggedIn.value) {
-        startPolling();
-    }
 });
-
-onBeforeUnmount(() => {
-    stopPolling();
-});
+watch(isActive, () => {
+    console.log('isActive', isActive)
+})
 </script>
 
 <template>

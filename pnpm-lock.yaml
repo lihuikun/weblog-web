@@ -14,6 +14,9 @@ dependencies:
   '@types/crypto-js':
     specifier: ^4.2.2
     version: 4.2.2
+  '@vueuse/core':
+    specifier: ^13.2.0
+    version: 13.2.0(vue@3.5.13)
   '@wangeditor/editor-for-vue':
     specifier: ^5.1.12
     version: 5.1.12(@wangeditor/editor@5.1.23)(vue@3.5.13)
@@ -37,7 +40,7 @@ dependencies:
     version: 4.2.0(pinia@3.0.1)
   unplugin-auto-import:
     specifier: ^19.1.1
-    version: 19.1.1
+    version: 19.1.1(@vueuse/core@13.2.0)
   vue:
     specifier: ^3.5.13
     version: 3.5.13(typescript@5.8.2)
@@ -1663,6 +1666,10 @@ packages:
       undici-types: 6.20.0
     dev: true
 
+  /@types/web-bluetooth@0.0.21:
+    resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
+    dev: false
+
   /@uppy/companion-client@2.2.2:
     resolution: {integrity: sha512-5mTp2iq97/mYSisMaBtFRry6PTgZA6SIL7LePteOV5x0/DxKfrZW3DEiQERJmYpHzy7k8johpm2gHnEKto56Og==}
     dependencies:
@@ -1917,6 +1924,29 @@ packages:
 
   /@vue/shared@3.5.13:
     resolution: {integrity: sha512-/hnE/qP5ZoGpol0a5mDi45bOd7t3tjYJBjsgCsivow7D48cJeV5l05RD82lPqi7gRiphZM37rnhW1l6ZoCNNnQ==}
+
+  /@vueuse/core@13.2.0(vue@3.5.13):
+    resolution: {integrity: sha512-n5TZoIAxbWAQ3PqdVPDzLgIRQOujFfMlatdI+f7ditSmoEeNpPBvp7h2zamzikCmrhFIePAwdEQB6ENccHr7Rg==}
+    peerDependencies:
+      vue: ^3.5.0
+    dependencies:
+      '@types/web-bluetooth': 0.0.21
+      '@vueuse/metadata': 13.2.0
+      '@vueuse/shared': 13.2.0(vue@3.5.13)
+      vue: 3.5.13(typescript@5.8.2)
+    dev: false
+
+  /@vueuse/metadata@13.2.0:
+    resolution: {integrity: sha512-kPpzuQCU0+D8DZCzK0iPpIcXI+6ufWSgwnjJ6//GNpEn+SHViaCtR+XurzORChSgvpHO9YC8gGM97Y1kB+UabA==}
+    dev: false
+
+  /@vueuse/shared@13.2.0(vue@3.5.13):
+    resolution: {integrity: sha512-vx9ZPDF5HcU9up3Jgt3G62dMUfZEdk6tLyBAHYAG4F4n73vpaA7J5hdncDI/lS9Vm7GA/FPlbOmh9TrDZROTpg==}
+    peerDependencies:
+      vue: ^3.5.0
+    dependencies:
+      vue: 3.5.13(typescript@5.8.2)
+    dev: false
 
   /@wangeditor/basic-modules@1.1.7(@wangeditor/core@1.1.19)(dom7@3.0.0)(lodash.throttle@4.1.1)(nanoid@3.3.11)(slate@0.72.8)(snabbdom@3.6.2):
     resolution: {integrity: sha512-cY9CPkLJaqF05STqfpZKWG4LpxTMeGSIIF1fHvfm/mz+JXatCagjdkbxdikOuKYlxDdeqvOeBmsUBItufDLXZg==}
@@ -4106,7 +4136,7 @@ packages:
       unplugin-utils: 0.2.4
     dev: false
 
-  /unplugin-auto-import@19.1.1:
+  /unplugin-auto-import@19.1.1(@vueuse/core@13.2.0):
     resolution: {integrity: sha512-sCGZZrSR1Bc8RfN8Q0RUDxXtC20rdAt7UB4lDyq8MNtKVHiXXh+5af6Nz4JRp9Q+7HjnbgQfQox0TkEymjdUAQ==}
     engines: {node: '>=14'}
     peerDependencies:
@@ -4118,6 +4148,7 @@ packages:
       '@vueuse/core':
         optional: true
     dependencies:
+      '@vueuse/core': 13.2.0(vue@3.5.13)
       local-pkg: 1.1.1
       magic-string: 0.30.17
       picomatch: 4.0.2

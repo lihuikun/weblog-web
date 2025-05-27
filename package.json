@@ -12,6 +12,7 @@
     "@ant-design/icons-vue": "^7.0.1",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@types/crypto-js": "^4.2.2",
+    "@vueuse/core": "^13.2.0",
     "@wangeditor/editor-for-vue": "^5.1.12",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.6.7",
