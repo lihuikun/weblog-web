@@ -150,6 +150,11 @@ watch(() => [props.visible, props.dream.id], ([visible, id]) => {
             <div class="analysis-content">
                 <!-- 非admin只读预览 -->
                 <div v-if="!isAdmin">
+                    <div v-if="!props.dream.interpretation && !isStreaming" class="flex mt-4">
+                        <AButton type="primary" :loading="loading" @click="fetchAnalysis">
+                            AI分析
+                        </AButton>
+                    </div>
                     <div v-if="!displayContent && !isStreaming" class="py-8 text-center text-gray-400">
                         暂无分析结果
                     </div>
@@ -161,11 +166,6 @@ watch(() => [props.visible, props.dream.id], ([visible, id]) => {
                             </div>
                             <!-- 非流式时正常显示 -->
                             <MdPreview v-else :model-value="displayContent" />
-                        </div>
-                        <div v-if="!props.dream.interpretation && !isStreaming" class="flex justify-end mt-4">
-                            <AButton type="primary" :loading="loading" @click="fetchAnalysis">
-                                AI分析
-                            </AButton>
                         </div>
                     </div>
                 </div>
