@@ -71,7 +71,7 @@ export async function analyzeDreamStream(
     onError: (error: any) => void
 ): Promise<SSEController> {
     return createSSEStream({
-        url: `/dream/analyze/${id}`,
+        url: `https://sse.lihk.top/dream/analyze/${id}`,
         // url: `http://localhost:21904/dream/analyze/19`,
         method: 'GET',
         onMessage,
