@@ -16,6 +16,8 @@ import {
   difficultyMap, 
   premiumOptions 
 } from '@/api/constants'
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
 
 // 面试题列表数据
 const interviews = ref<Interview[]>([])
@@ -305,7 +307,7 @@ onMounted(fetchInterviews)
                     </AFormItem>
 
                     <AFormItem label="答案" required>
-                        <ATextarea v-model:value="formData.answer" :rows="8" placeholder="请输入答案" />
+                        <MdEditor v-model="formData.answer" style="height: 350px" />
                     </AFormItem>
                     <AFormItem label="会员专属" required>
                         <ASwitch v-model:checked="formData.requirePremium" />

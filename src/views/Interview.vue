@@ -6,15 +6,15 @@ import { getInterviewList, getInterviewAnswer, Interview as InterviewType } from
 import { difficultyOptions, difficultyMap } from '@/api/constants'
 import { useUserStore } from '@/stores/userStore'
 import { useRoute, useRouter } from 'vue-router'
-
+import { MdPreview } from 'md-editor-v3'
 // 路由相关
 const route = useRoute()
 const router = useRouter()
 
 // 获取路由中的技术分类菜单
 const menuOptions = computed(() => {
-  const routeMenu = route.meta?.menu as { key: string; label: string }[] || []
-  return routeMenu
+    const routeMenu = route.meta?.menu as { key: string; label: string }[] || []
+    return routeMenu
 })
 
 // 用户信息
@@ -40,208 +40,208 @@ const answerVisibility = ref<Record<number, boolean>>({})
 
 // 获取面试题列表
 const fetchInterviews = async () => {
-  loading.value = true
-  error.value = null
-  
-  try {
-    // 构建请求参数
-    const params: any = { 
-      page: page.value, 
-      pageSize: pageSize.value 
+    loading.value = true
+    error.value = null
+
+    try {
+        // 构建请求参数
+        const params: any = {
+            page: page.value,
+            pageSize: pageSize.value
+        }
+
+        // 添加筛选条件
+        if (currentDifficulty.value !== 0) {
+            params.difficulty = currentDifficulty.value
+        }
+
+        if (requirePremium.value !== '') {
+            params.requirePremium = requirePremium.value === 'true'
+        }
+
+        if (selectedCategory.value !== 'all') {
+            params.categoryId = selectedCategory.value
+        }
+
+        const { data } = await getInterviewList(params)
+        interviews.value = data.list
+        total.value = data.total
+    } catch (err) {
+        console.error('获取面试题列表失败:', err)
+        error.value = '获取面试题列表失败'
+        message.error('获取面试题列表失败')
+    } finally {
+        loading.value = false
     }
-    
-    // 添加筛选条件
-    if (currentDifficulty.value !== 0) {
-      params.difficulty = currentDifficulty.value
-    }
-    
-    if (requirePremium.value !== '') {
-      params.requirePremium = requirePremium.value === 'true'
-    }
-    
-    if (selectedCategory.value !== 'all') {
-      params.categoryId = selectedCategory.value
-    }
-    
-    const { data } = await getInterviewList(params)
-    interviews.value = data.list
-    total.value = data.total
-  } catch (err) {
-    console.error('获取面试题列表失败:', err)
-    error.value = '获取面试题列表失败'
-    message.error('获取面试题列表失败')
-  } finally {
-    loading.value = false
-  }
 }
 
 // 加载更多面试题
 const loadMore = async () => {
-  if (loading.value) return
-  if (interviews.value.length >= total.value) return
-  
-  page.value++
-  loading.value = true
-  
-  try {
-    const params: any = { 
-      page: page.value, 
-      pageSize: pageSize.value 
+    if (loading.value) return
+    if (interviews.value.length >= total.value) return
+
+    page.value++
+    loading.value = true
+
+    try {
+        const params: any = {
+            page: page.value,
+            pageSize: pageSize.value
+        }
+
+        if (currentDifficulty.value !== 0) {
+            params.difficulty = currentDifficulty.value
+        }
+
+        if (requirePremium.value !== '') {
+            params.requirePremium = requirePremium.value === 'true'
+        }
+
+        if (selectedCategory.value !== 'all') {
+            params.categoryId = selectedCategory.value
+        }
+
+        const { data } = await getInterviewList(params)
+        interviews.value = [...interviews.value, ...data.list]
+    } catch (err) {
+        console.error('加载更多面试题失败:', err)
+        message.error('加载更多面试题失败')
+    } finally {
+        loading.value = false
     }
-    
-    if (currentDifficulty.value !== 0) {
-      params.difficulty = currentDifficulty.value
-    }
-    
-    if (requirePremium.value !== '') {
-      params.requirePremium = requirePremium.value === 'true'
-    }
-    
-    if (selectedCategory.value !== 'all') {
-      params.categoryId = selectedCategory.value
-    }
-    
-    const { data } = await getInterviewList(params)
-    interviews.value = [...interviews.value, ...data.list]
-  } catch (err) {
-    console.error('加载更多面试题失败:', err)
-    message.error('加载更多面试题失败')
-  } finally {
-    loading.value = false
-  }
 }
 
 // 获取答案
 const getAnswer = async (id: number) => {
-  if (!userStore.token) {
-    message.warning('请先登录')
-    return
-  }
-  
-  try {
-    const { data } = await getInterviewAnswer(id)
-    return data.answer
-  } catch (err: any) {
-    // 处理会员权限错误
-    if (err.response && err.response.status === 403) {
-      message.warning('此答案需要会员权限才能查看')
-    } else {
-      message.error('获取答案失败')
+    if (!userStore.token) {
+        message.warning('请先登录')
+        return
     }
-    return null
-  }
+
+    try {
+        const { data } = await getInterviewAnswer(id)
+        return data.answer
+    } catch (err: any) {
+        // 处理会员权限错误
+        if (err.response && err.response.status === 403) {
+            message.warning('此答案需要会员权限才能查看')
+        } else {
+            message.error('获取答案失败')
+        }
+        return null
+    }
 }
 
 // 切换单个问题答案显示状态
 const toggleAnswer = async (interview: InterviewType) => {
-  // 如果答案已经存在或者已经在显示中，直接切换显示状态
-  if (interview.answer || answerVisibility.value[interview.id]) {
-    answerVisibility.value[interview.id] = !answerVisibility.value[interview.id]
-    return
-  }
-  
-  // 如果还没有加载答案，则获取答案
-  try {
-    const answer = await getAnswer(interview.id)
-    
-    if (answer) {
-      // 更新面试题对象，添加答案
-      const index = interviews.value.findIndex(item => item.id === interview.id)
-      if (index !== -1) {
-        interviews.value[index] = {
-          ...interviews.value[index],
-          answer
-        }
-        // 显示答案
-        answerVisibility.value[interview.id] = true
-      }
+    // 如果答案已经存在或者已经在显示中，直接切换显示状态
+    if (interview.answer || answerVisibility.value[interview.id]) {
+        answerVisibility.value[interview.id] = !answerVisibility.value[interview.id]
+        return
     }
-  } catch (err) {
-    console.error('获取答案失败:', err)
-  }
+
+    // 如果还没有加载答案，则获取答案
+    try {
+        const answer = await getAnswer(interview.id)
+
+        if (answer) {
+            // 更新面试题对象，添加答案
+            const index = interviews.value.findIndex(item => item.id === interview.id)
+            if (index !== -1) {
+                interviews.value[index] = {
+                    ...interviews.value[index],
+                    answer
+                }
+                // 显示答案
+                answerVisibility.value[interview.id] = true
+            }
+        }
+    } catch (err) {
+        console.error('获取答案失败:', err)
+    }
 }
 
 // 切换所有答案显示状态
 const toggleAllAnswers = () => {
-  // 如果开启全部显示，可能需要逐个加载答案
-  if (showAllAnswers.value) {
-    interviews.value.forEach(interview => {
-      answerVisibility.value[interview.id] = true
-      // 如果没有答案，需要加载
-      if (!interview.answer) {
-        getAnswer(interview.id).then(answer => {
-          if (answer) {
-            const index = interviews.value.findIndex(item => item.id === interview.id)
-            if (index !== -1) {
-              interviews.value[index] = {
-                ...interviews.value[index],
-                answer
-              }
+    // 如果开启全部显示，可能需要逐个加载答案
+    if (showAllAnswers.value) {
+        interviews.value.forEach(interview => {
+            answerVisibility.value[interview.id] = true
+            // 如果没有答案，需要加载
+            if (!interview.answer) {
+                getAnswer(interview.id).then(answer => {
+                    if (answer) {
+                        const index = interviews.value.findIndex(item => item.id === interview.id)
+                        if (index !== -1) {
+                            interviews.value[index] = {
+                                ...interviews.value[index],
+                                answer
+                            }
+                        }
+                    }
+                })
             }
-          }
         })
-      }
-    })
-  } else {
-    // 关闭所有答案显示
-    interviews.value.forEach(interview => {
-      answerVisibility.value[interview.id] = false
-    })
-  }
+    } else {
+        // 关闭所有答案显示
+        interviews.value.forEach(interview => {
+            answerVisibility.value[interview.id] = false
+        })
+    }
 }
 
 // 监听筛选条件变化
 watch([currentDifficulty, requirePremium], () => {
-  page.value = 1 // 重置页码
-  interviews.value = [] // 清空当前列表
-  answerVisibility.value = {} // 重置答案显示状态
-  fetchInterviews() // 重新加载数据
+    page.value = 1 // 重置页码
+    interviews.value = [] // 清空当前列表
+    answerVisibility.value = {} // 重置答案显示状态
+    fetchInterviews() // 重新加载数据
 })
 
 // 监听页面滚动，实现无限加载
 const handleScroll = () => {
-  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
-  const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
-  const clientHeight = document.documentElement.clientHeight || document.body.clientHeight
-  
-  // 滚动到底部时加载更多
-  if (scrollTop + clientHeight >= scrollHeight - 100 && !loading.value) {
-    loadMore()
-  }
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
+    const clientHeight = document.documentElement.clientHeight || document.body.clientHeight
+
+    // 滚动到底部时加载更多
+    if (scrollTop + clientHeight >= scrollHeight - 100 && !loading.value) {
+        loadMore()
+    }
 }
 
 // 检查用户是否是会员
 const checkUserIsPremium = () => {
-  isPremium.value = userStore.userInfo?.isPremium || false
+    isPremium.value = userStore.userInfo?.isPremium || false
 }
 
 // 获取分类名称
 const getCategoryName = (categoryId: number) => {
-  const category = menuOptions.value.find(item => item.key === categoryId.toString())
-  return category?.label || '未分类'
+    const category = menuOptions.value.find(item => item.key === categoryId.toString())
+    return category?.label || '未分类'
 }
 
 // 获取难度对应的文字和颜色
 const getDifficultyInfo = (difficulty: number) => {
-  const info = difficultyMap[difficulty as keyof typeof difficultyMap]
-  return info || { color: 'default', text: '未知' }
+    const info = difficultyMap[difficulty as keyof typeof difficultyMap]
+    return info || { color: 'default', text: '未知' }
 }
 
 onMounted(() => {
-  fetchInterviews()
-  checkUserIsPremium()
-  window.addEventListener('scroll', handleScroll)
+    fetchInterviews()
+    checkUserIsPremium()
+    window.addEventListener('scroll', handleScroll)
 })
 
 // 组件卸载时移除滚动监听
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+    window.removeEventListener('scroll', handleScroll)
 })
 
 // 格式化难度选项，添加"全部"选项
 const formattedDifficultyOptions = [
-  { value: 0, label: '全部难度' },
-  ...difficultyOptions
+    { value: 0, label: '全部难度' },
+    ...difficultyOptions
 ]
 </script>
 
@@ -253,9 +253,9 @@ const formattedDifficultyOptions = [
                 <!-- 顶部难度选择Tab -->
                 <div class="custom-tabs difficulty-tabs">
                     <div v-for="option in [{ value: 0, label: '全部' }, ...difficultyOptions]" :key="option.value" :class="[
-              'tab-item', 
-              currentDifficulty == option.value ? 'active' : ''
-            ]" @click="currentDifficulty = option.value">
+                        'tab-item',
+                        currentDifficulty == option.value ? 'active' : ''
+                    ]" @click="currentDifficulty = option.value">
                         {{ option.label }}
                     </div>
                 </div>
@@ -337,7 +337,7 @@ const formattedDifficultyOptions = [
                                 <div v-if="answerVisibility[interview.id]" class="pt-4 mt-4 border-t">
                                     <div v-if="interview.answer" class="p-4 whitespace-pre-wrap bg-gray-50 rounded-md">
                                         <div class="mb-2 font-bold">答案：</div>
-                                        {{ interview.answer }}
+                                        <MdPreview class="md-preview-custom" :modelValue="interview.answer" />
                                     </div>
                                     <div v-else class="p-4 text-gray-500 bg-gray-50 rounded-md">
                                         {{ interview.requirePremium && !isPremium ? '此答案需要会员权限才能查看' : '加载中...' }}
@@ -360,59 +360,141 @@ const formattedDifficultyOptions = [
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .interview-card {
-  transition: all 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .interview-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* 吸顶效果 */
 .sticky {
-  position: sticky;
-  background-color: white;
-  border-bottom: none;
+    position: sticky;
+    background-color: white;
+    border-bottom: none;
 }
 
 /* 自定义Tab样式 */
 .custom-tabs {
-  display: flex;
-  border-bottom: none;
-  margin-bottom: 1rem;
+    display: flex;
+    border-bottom: none;
+    margin-bottom: 1rem;
 }
 
 .tab-item {
-  padding: 0.5rem 1.5rem;
-  cursor: pointer;
-  position: relative;
-  font-size: 14px;
-  transition: all 0.2s;
-  border-radius: 4px;
-  margin-right: 0.25rem;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    position: relative;
+    font-size: 14px;
+    transition: all 0.2s;
+    border-radius: 4px;
+    margin-right: 0.25rem;
 }
 
 .tab-item:hover {
-  color: #1890ff;
-  background-color: rgba(24, 144, 255, 0.05);
+    color: #1890ff;
+    background-color: rgba(24, 144, 255, 0.05);
 }
 
 .tab-item.active {
-  color: #1890ff;
-  font-weight: 500;
-  background-color: rgba(24, 144, 255, 0.1);
+    color: #1890ff;
+    font-weight: 500;
+    background-color: rgba(24, 144, 255, 0.1);
 }
 
 .tab-item.active::after {
-  display: none;
+    display: none;
 }
 
 .difficulty-tabs .tab-item {
-  padding: 0.35rem 1.5rem;
+    padding: 0.35rem 1.5rem;
 }
 
 .premium-tabs .tab-item {
-  padding: 0.35rem 1.2rem;
+    padding: 0.35rem 1.2rem;
 }
-</style> 
+
+.bg-gray-50 {
+    background-color: var(--color-gray-50);
+
+    h2 {
+        font-size: 20px;
+    }
+}
+
+/* Markdown 预览组件的自定义样式 */
+:deep(.md-preview-custom) {
+    /* 覆盖默认背景色 */
+    background-color: var(--color-gray-50) !important;
+    
+    /* 调整内部元素样式 */
+    .md-editor-preview-wrapper {
+        background-color: transparent !important;
+        padding: 0 !important;
+    }
+
+    /* 代码块样式 */
+    pre {
+        background-color: #f8f8f8 !important;
+        border-radius: 4px !important;
+        padding: 12px !important;
+        margin: 10px 0 !important;
+    }
+
+    /* 标题样式 */
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 600 !important;
+        font-size: 20px;
+    }
+
+    /* 列表样式 */
+    ul, ol {
+        padding-left: 24px !important;
+        margin: 8px 0 !important;
+    }
+
+    /* 段落样式 */
+    p {
+        margin: 8px 0 !important;
+        line-height: 1.6 !important;
+    }
+
+    /* 表格样式 */
+    table {
+        border-collapse: collapse !important;
+        margin: 16px 0 !important;
+        width: 100% !important;
+    }
+
+    th, td {
+        border: 1px solid #ddd !important;
+        padding: 8px 12px !important;
+        text-align: left !important;
+    }
+
+    th {
+        background-color: #f0f0f0 !important;
+        font-weight: 600 !important;
+    }
+
+    /* 引用样式 */
+    blockquote {
+        border-left: 4px solid #1890ff !important;
+        padding-left: 16px !important;
+        margin: 16px 0 !important;
+        color: #666 !important;
+    }
+
+    /* 链接样式 */
+    a {
+        color: #1890ff !important;
+        text-decoration: none !important;
+    }
+
+    a:hover {
+        text-decoration: underline !important;
+    }
+}
+</style>
