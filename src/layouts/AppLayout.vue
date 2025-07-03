@@ -56,7 +56,7 @@ const sideMenuId = ref<string[]>(
 
 // 导航菜单项
 const navItems = [
-    { key: 'home', label: '首页', path: '/', isNew: true },
+    { key: 'interview', label: '面试题库', path: '/interview', isNew: true },
     { key: 'hot-search', label: '热搜榜', path: '/hot-search' },
     { key: 'game', label: '摸鱼小游戏', path: '/game' },
     { key: 'dream', label: '集梦盒子', path: '/dream' },
@@ -305,48 +305,6 @@ watch(isActive, () => {
                         class="overflow-y-auto px-6 h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1 shadow-lg ml-[10px] rounded-lg">
                         <slot :sideMenuId="sideMenuId" />
                     </div>
-
-                    <!-- 右侧边栏 - 仅在大屏幕显示 -->
-                    <a-layout-sider class="hidden bg-transparent lg:block" width="300"
-                        :style="{ background: 'transparent' }">
-                        <div class="ml-6">
-                            <!-- 签到卡片 -->
-                            <a-card title="微信公众号：前端的日常" class="mb-4">
-                                <div class="font-bold">路过的大佬，麻烦关注一下,{{ year }}发大财</div>
-                                <div class="mt-2">
-                                    <img src="@/assets/qrcode.png" alt="">
-                                </div>
-                            </a-card>
-                            <a-card class="mb-4" title="前端日常开发分享">
-                                <div class="flex justify-between items-center">
-                                    有兴趣一起进步的小伙伴可以关注一下，沟通进步~
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    不要让知识在收藏夹里面吃灰，一起出来讨论呀~
-                                </div>
-                                <iframe class="w-full h-[70px]" src="https://flip-clock.lihk.top"
-                                    frameborder="0"></iframe>
-                            </a-card>
-                            <a-card title="网站PV" class="mb-4">
-                                <div class="flex">
-                                    <div class="flex flex-col flex-1 items-center">
-                                        <div class="font-bold">今日 PV</div>
-                                        <div>{{ PVTotal.todayPv }}</div>
-                                    </div>
-                                    <div class="flex flex-col flex-1 items-center">
-                                        <div class="font-bold">总 PV</div>
-                                        <div>{{ PVTotal.totalPv }}</div>
-                                    </div>
-                                </div>
-                            </a-card>
-                            <a-card title="微信小程序：前端的日常" class="mb-4">
-                                <div class="font-bold">路过的大佬，麻烦关注一下,{{ year }}发大财</div>
-                                <div class="mt-2">
-                                    <img src="@/assets/qrcode.bmp" alt="">
-                                </div>
-                            </a-card>
-                        </div>
-                    </a-layout-sider>
                 </a-layout>
             </a-layout>
         </div>

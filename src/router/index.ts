@@ -33,6 +33,27 @@ const mainRoutes: Array<RouteRecordRaw> = [
     },
   },
   {
+    path: '/interview',
+    name: 'Interview',
+    component: () => import('@/views/Interview.vue'),
+    meta: {
+      title: '面试题库',
+      keepAlive: true,
+      requiresAuth: false,
+      layout: 'default',
+      menu: [
+        { key: 'all', label: '全部' },
+        { key: '1', label: 'JavaScript' },
+        { key: '2', label: 'Vue' },
+        { key: '3', label: 'React' },
+        { key: '4', label: 'Node.js' },
+        { key: '5', label: '算法' },
+        { key: '6', label: '网络' },
+        { key: '7', label: '浏览器' }
+      ]
+    },
+  },
+  {
     path: '/hot-search',
     name: 'hot-search',
     component: () => import('@/views/HotSearch.vue'),
