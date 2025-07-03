@@ -14,26 +14,6 @@ export interface Menu {
 const mainRoutes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('@/views/Home.vue'),
-    meta: {
-      title: '首页',
-      keepAlive: true,
-      requiresAuth: true,
-      layout: 'default',
-      menu: [
-        { key: '0', label: '最新文章', icon: 'user-outlined' },
-        { key: '1', label: 'Vue', icon: 'appstore-outlined' },
-        { key: '2', label: 'NestJs', icon: 'trophy-outlined' },
-        { key: '3', label: '前端', icon: 'database-outlined' },
-        { key: '4', label: '微信小程序', icon: 'code-outlined' },
-        { key: '5', label: 'Node', icon: 'android-outlined' },
-        { key: '6', label: '本站搭建', icon: 'android-outlined' },
-      ]
-    },
-  },
-  {
-    path: '/interview',
     name: 'Interview',
     component: () => import('@/views/Interview.vue'),
     meta: {
