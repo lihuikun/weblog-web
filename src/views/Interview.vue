@@ -190,15 +190,6 @@ const toggleAllAnswers = () => {
   }
 }
 
-// 处理技术分类变更
-const handleCategoryChange = (key: string | number) => {
-  selectedCategory.value = key
-  page.value = 1
-  interviews.value = []
-  answerVisibility.value = {}
-  fetchInterviews()
-}
-
 // 监听筛选条件变化
 watch([currentDifficulty, requirePremium], () => {
   page.value = 1 // 重置页码
