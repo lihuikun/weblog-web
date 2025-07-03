@@ -167,6 +167,9 @@ onMounted(fetchUsers)
                         <ASelect v-model:value="editForm.role" :options="roleList">
                         </ASelect>
                     </AFormItem>
+                    <AFormItem label="会员状态">
+                        <ASwitch v-model:checked="editForm.isPremium" />
+                    </AFormItem>
                 </AForm>
             </AModal>
         </div>
