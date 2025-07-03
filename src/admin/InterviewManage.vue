@@ -10,6 +10,12 @@ import {
   CreateInterviewDto
 } from '@/api/interview'
 import { useDateFormatter } from '@/hooks/useDateFormatter'
+import { 
+  categoryOptions, 
+  difficultyOptions, 
+  difficultyMap, 
+  premiumOptions 
+} from '@/api/constants'
 
 // 面试题列表数据
 const interviews = ref<Interview[]>([])
@@ -176,12 +182,6 @@ const columns = [
     key: 'difficulty',
     width: 100,
     customRender: ({ record }: { record: Interview }) => {
-      const difficultyMap = {
-        1: { color: 'green', text: '简单' },
-        2: { color: 'blue', text: '中等' },
-        3: { color: 'orange', text: '困难' },
-        4: { color: 'red', text: '专家' }
-      }
       const difficulty = difficultyMap[record.difficulty as keyof typeof difficultyMap] || { color: 'default', text: '未知' }
       
       return (
@@ -241,31 +241,6 @@ const columns = [
       )
     }
   }
-]
-
-// 分类选项
-const categoryOptions = [
-  { value: 1, label: 'JavaScript' },
-  { value: 2, label: 'Vue' },
-  { value: 3, label: 'React' },
-  { value: 4, label: 'Node.js' },
-  { value: 5, label: '算法' },
-  { value: 6, label: '网络' },
-  { value: 7, label: '浏览器' }
-]
-
-// 难度选项
-const difficultyOptions = [
-  { value: 1, label: '简单' },
-  { value: 2, label: '中等' },
-  { value: 3, label: '困难' },
-  { value: 4, label: '专家' }
-]
-
-// 会员选项
-const premiumOptions = [
-  { value: true, label: '会员专属' },
-  { value: false, label: '所有用户' }
 ]
 
 // 组件挂载时加载数据
