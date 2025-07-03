@@ -290,8 +290,6 @@ const formattedDifficultyOptions = [
 
             <!-- 题目列表 -->
             <div class="flex-1">
-                <h2 class="mb-4 text-xl font-bold">面试题库</h2>
-
                 <!-- 面试题列表 -->
                 <Spin :spinning="loading">
                     <div v-if="error" class="p-4 text-red-500">{{ error }}</div>
@@ -306,7 +304,7 @@ const formattedDifficultyOptions = [
                             :bordered="true">
                             <!-- 题目标题和难度 -->
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold">{{ interview.title }}</h3>
+                                <h3 class="text-lg font-bold">{{ interview.question }}</h3>
                                 <div class="flex gap-2 items-center">
                                     <Tag :color="getDifficultyInfo(interview.difficulty).color">
                                         {{ getDifficultyInfo(interview.difficulty).text }}
@@ -315,14 +313,11 @@ const formattedDifficultyOptions = [
                                 </div>
                             </div>
 
-                            <!-- 题目内容 - 完整显示 -->
-                            <div class="mb-4 text-gray-700 whitespace-pre-wrap">{{ interview.question }}</div>
-
                             <!-- 答案和切换按钮 -->
                             <div class="pt-3 border-t">
                                 <div class="flex justify-between items-center">
                                     <div class="text-sm text-gray-500">
-                                        分类：{{ getCategoryName(interview.categoryId) }}
+                                        分类：<Tag color="gold">{{ getCategoryName(interview.categoryId) }}</Tag>
                                     </div>
 
                                     <div class="flex gap-1 items-center text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
