@@ -31,6 +31,7 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const hasMore = ref(true)
+const isInitialized = ref(false) // 添加初始化标志
 
 // 筛选条件
 const currentDifficulty = ref<number | string>(0) // 0 表示全部
@@ -49,6 +50,9 @@ const answerVisibility = ref<Record<number, boolean>>({})
 
 // 获取面试题列表
 const fetchInterviews = async (isLoadMore = false) => {
+    // 防止重复请求
+    if ((isLoadMore && loadingMore.value) || (!isLoadMore && loading.value)) return
+
     if (isLoadMore) {
         loadingMore.value = true
     } else {
@@ -99,8 +103,9 @@ const fetchInterviews = async (isLoadMore = false) => {
 
 // 加载更多面试题
 const loadMore = async () => {
+    // 如果正在加载或没有更多数据，直接返回
     if (loadingMore.value || !hasMore.value) return
-
+    
     page.value++
     await fetchInterviews(true)
 }
@@ -195,11 +200,17 @@ watch([currentDifficulty, requirePremium], () => {
 const { sideMenuId } = defineProps<{ sideMenuId: string[] }>();
 // 监听路由变化
 watchEffect(() => {
-    console.log('111', sideMenuId)
+    // 避免重复初始化
+    if (isInitialized.value && sideMenuId[0] === selectedCategory.value) {
+        return
+    }
+    
+    console.log('初始化数据', sideMenuId)
     selectedCategory.value = sideMenuId[0]
     page.value = 1
     interviews.value = []
     answerVisibility.value = {}
+    isInitialized.value = true
     fetchInterviews()
 })
 
@@ -209,8 +220,9 @@ const scrollContainer = ref<HTMLElement | null>(null)
 const handleScroll = (e: Event) => {
     const element = e.target as HTMLElement
     const scrollBottom = element.scrollHeight - element.scrollTop - element.clientHeight
-
-    if (scrollBottom < 50 && !loadingMore.value && hasMore.value) {
+    
+    // 当滚动到距离底部 100px 时加载更多
+    if (scrollBottom < 100 && !loadingMore.value && hasMore.value) {
         loadMore()
     }
 }
@@ -232,27 +244,12 @@ const getDifficultyInfo = (difficulty: number) => {
     return info || { color: 'default', text: '未知' }
 }
 
-// 切换分类
-const handleCategoryChange = (categoryId: string | number) => {
-    router.push({
-        query: {
-            ...route.query,
-            category: categoryId === 'all' ? undefined : categoryId
-        }
-    })
-}
-
 onMounted(() => {
     initFromRoute()
     checkUserIsPremium()
-    fetchInterviews()
 })
 
-// 格式化难度选项，添加"全部"选项
-const formattedDifficultyOptions = [
-    { value: 0, label: '全部难度' },
-    ...difficultyOptions
-]
+
 </script>
 
 <template>
@@ -289,7 +286,7 @@ const formattedDifficultyOptions = [
                     <div class="px-5 py-1.5 cursor-pointer text-sm rounded mr-1 transition-colors"
                         :class="{ 'bg-blue-50 text-blue-500 font-medium': requirePremium === 'true', 'hover:bg-blue-50 hover:text-blue-500': requirePremium !== 'true' }"
                         @click="requirePremium = 'true'">
-                        会员
+                        VIP
                     </div>
                 </div>
 
