@@ -3,7 +3,7 @@ import publicRoutes from './public-routes';
 import adminRoutes from './admin-routes';
 import { message } from 'ant-design-vue';
 import { useUserStore } from '@/stores/userStore';
-
+import { categoryOptions } from '@/api/constants';
 export interface Menu {
   key: string;
   label: string;
@@ -23,13 +23,7 @@ const mainRoutes: Array<RouteRecordRaw> = [
       layout: 'default',
       menu: [
         { key: 'all', label: '全部' },
-        { key: '1', label: 'JavaScript' },
-        { key: '2', label: 'Vue' },
-        { key: '3', label: 'React' },
-        { key: '4', label: 'Node.js' },
-        { key: '5', label: '算法' },
-        { key: '6', label: '网络' },
-        { key: '7', label: '浏览器' }
+        ...categoryOptions.map(item => ({ key: item.value.toString(), label: item.label }))
       ]
     },
   },

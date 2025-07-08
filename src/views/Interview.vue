@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, nextTick, onUnmounted, watchEffect } from 'vue'
 import { message, Spin, Card, Tabs, Switch, Tag } from 'ant-design-vue'
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue'
 import { getInterviewList, getInterviewAnswer, Interview as InterviewType } from '@/api/interview'
@@ -7,6 +7,7 @@ import { difficultyOptions, difficultyMap } from '@/api/constants'
 import { useUserStore } from '@/stores/userStore'
 import { useRoute, useRouter } from 'vue-router'
 import { MdPreview } from 'md-editor-v3'
+import 'md-editor-v3/lib/preview.css';
 // 路由相关
 const route = useRoute()
 const router = useRouter()
@@ -24,10 +25,12 @@ const isPremium = ref(false) // 是否是会员用户
 // 面试题列表
 const interviews = ref<InterviewType[]>([])
 const loading = ref(false)
+const loadingMore = ref(false)
 const error = ref<string | null>(null)
 const page = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const total = ref(0)
+const hasMore = ref(true)
 
 // 筛选条件
 const currentDifficulty = ref<number | string>(0) // 0 表示全部
@@ -35,12 +38,23 @@ const requirePremium = ref<string>('') // 空字符串表示全部
 const selectedCategory = ref<string | number>('all') // 默认为全部
 const showAllAnswers = ref(false) // 控制是否显示所有答案
 
+// 从路由参数中获取分类
+const initFromRoute = () => {
+    const categoryId = route.query.category || 'all'
+    selectedCategory.value = categoryId as string
+}
+
 // 记录每个题目答案的显示状态
 const answerVisibility = ref<Record<number, boolean>>({})
 
 // 获取面试题列表
-const fetchInterviews = async () => {
-    loading.value = true
+const fetchInterviews = async (isLoadMore = false) => {
+    if (isLoadMore) {
+        loadingMore.value = true
+    } else {
+        loading.value = true
+    }
+
     error.value = null
 
     try {
@@ -64,51 +78,31 @@ const fetchInterviews = async () => {
         }
 
         const { data } = await getInterviewList(params)
-        interviews.value = data.list
+
+        if (isLoadMore) {
+            interviews.value = [...interviews.value, ...data.list]
+        } else {
+            interviews.value = data.list
+        }
+
         total.value = data.total
+        hasMore.value = interviews.value.length < total.value
     } catch (err) {
         console.error('获取面试题列表失败:', err)
         error.value = '获取面试题列表失败'
         message.error('获取面试题列表失败')
     } finally {
         loading.value = false
+        loadingMore.value = false
     }
 }
 
 // 加载更多面试题
 const loadMore = async () => {
-    if (loading.value) return
-    if (interviews.value.length >= total.value) return
+    if (loadingMore.value || !hasMore.value) return
 
     page.value++
-    loading.value = true
-
-    try {
-        const params: any = {
-            page: page.value,
-            pageSize: pageSize.value
-        }
-
-        if (currentDifficulty.value !== 0) {
-            params.difficulty = currentDifficulty.value
-        }
-
-        if (requirePremium.value !== '') {
-            params.requirePremium = requirePremium.value === 'true'
-        }
-
-        if (selectedCategory.value !== 'all') {
-            params.categoryId = selectedCategory.value
-        }
-
-        const { data } = await getInterviewList(params)
-        interviews.value = [...interviews.value, ...data.list]
-    } catch (err) {
-        console.error('加载更多面试题失败:', err)
-        message.error('加载更多面试题失败')
-    } finally {
-        loading.value = false
-    }
+    await fetchInterviews(true)
 }
 
 // 获取答案
@@ -198,14 +192,25 @@ watch([currentDifficulty, requirePremium], () => {
     fetchInterviews() // 重新加载数据
 })
 
-// 监听页面滚动，实现无限加载
-const handleScroll = () => {
-    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop
-    const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
-    const clientHeight = document.documentElement.clientHeight || document.body.clientHeight
+const { sideMenuId } = defineProps<{ sideMenuId: string[] }>();
+// 监听路由变化
+watchEffect(() => {
+    console.log('111', sideMenuId)
+    selectedCategory.value = sideMenuId[0]
+    page.value = 1
+    interviews.value = []
+    answerVisibility.value = {}
+    fetchInterviews()
+})
 
-    // 滚动到底部时加载更多
-    if (scrollTop + clientHeight >= scrollHeight - 100 && !loading.value) {
+// 监听页面滚动，实现无限加载
+const scrollContainer = ref<HTMLElement | null>(null)
+
+const handleScroll = (e: Event) => {
+    const element = e.target as HTMLElement
+    const scrollBottom = element.scrollHeight - element.scrollTop - element.clientHeight
+
+    if (scrollBottom < 50 && !loadingMore.value && hasMore.value) {
         loadMore()
     }
 }
@@ -227,15 +232,20 @@ const getDifficultyInfo = (difficulty: number) => {
     return info || { color: 'default', text: '未知' }
 }
 
-onMounted(() => {
-    fetchInterviews()
-    checkUserIsPremium()
-    window.addEventListener('scroll', handleScroll)
-})
+// 切换分类
+const handleCategoryChange = (categoryId: string | number) => {
+    router.push({
+        query: {
+            ...route.query,
+            category: categoryId === 'all' ? undefined : categoryId
+        }
+    })
+}
 
-// 组件卸载时移除滚动监听
-onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
+onMounted(() => {
+    initFromRoute()
+    checkUserIsPremium()
+    fetchInterviews()
 })
 
 // 格式化难度选项，添加"全部"选项
@@ -246,15 +256,17 @@ const formattedDifficultyOptions = [
 </script>
 
 <template>
-    <div class="p-4 interview-page">
-        <!-- 固定吸顶的筛选栏 -->
-        <div class="sticky top-0 z-10 pb-4 bg-white">
-            <div class="pb-2 bg-white tab-container">
-                <!-- 顶部难度选择Tab -->
-                <div class="custom-tabs difficulty-tabs">
+    <div class="p-4 flex flex-col h-[calc(100vh-64px)]">
+        <!-- 顶部固定的筛选栏 -->
+        <div class="pb-4 bg-white">
+            <div class="pb-2 bg-white">
+                <!-- 难度选择Tab -->
+                <div class="flex mb-4 overflow-x-auto scrollbar-hide">
                     <div v-for="option in [{ value: 0, label: '全部' }, ...difficultyOptions]" :key="option.value" :class="[
-                        'tab-item',
-                        currentDifficulty == option.value ? 'active' : ''
+                        'px-6 py-1.5 cursor-pointer text-sm rounded mr-1 transition-colors whitespace-nowrap',
+                        currentDifficulty == option.value
+                            ? 'bg-blue-50 text-blue-500 font-medium'
+                            : 'hover:bg-blue-50 hover:text-blue-500'
                     ]" @click="currentDifficulty = option.value">
                         {{ option.label }}
                     </div>
@@ -263,15 +275,19 @@ const formattedDifficultyOptions = [
 
             <!-- 会员/非会员选择 + 显示答案开关 -->
             <div class="flex justify-between items-center bg-white">
-                <div class="custom-tabs premium-tabs">
-                    <div class="tab-item" :class="{ active: requirePremium === '' }" @click="requirePremium = ''">
+                <div class="flex mb-4">
+                    <div class="px-5 py-1.5 cursor-pointer text-sm rounded mr-1 transition-colors"
+                        :class="{ 'bg-blue-50 text-blue-500 font-medium': requirePremium === '', 'hover:bg-blue-50 hover:text-blue-500': requirePremium !== '' }"
+                        @click="requirePremium = ''">
                         全部
                     </div>
-                    <div class="tab-item" :class="{ active: requirePremium === 'false' }"
+                    <div class="px-5 py-1.5 cursor-pointer text-sm rounded mr-1 transition-colors"
+                        :class="{ 'bg-blue-50 text-blue-500 font-medium': requirePremium === 'false', 'hover:bg-blue-50 hover:text-blue-500': requirePremium !== 'false' }"
                         @click="requirePremium = 'false'">
                         免费
                     </div>
-                    <div class="tab-item" :class="{ active: requirePremium === 'true' }"
+                    <div class="px-5 py-1.5 cursor-pointer text-sm rounded mr-1 transition-colors"
+                        :class="{ 'bg-blue-50 text-blue-500 font-medium': requirePremium === 'true', 'hover:bg-blue-50 hover:text-blue-500': requirePremium !== 'true' }"
                         @click="requirePremium = 'true'">
                         会员
                     </div>
@@ -284,212 +300,103 @@ const formattedDifficultyOptions = [
             </div>
         </div>
 
-        <!--内容 -->
-        <div class="flex flex-wrap gap-6 mt-4 md:flex-nowrap">
+        <!--内容区域，可滚动但隐藏滚动条 -->
+        <div class="flex-1 overflow-y-auto scrollbar-hide" ref="scrollContainer" @scroll="handleScroll">
+            <div class="flex flex-wrap gap-6 mt-4 md:flex-nowrap">
+                <!-- 题目列表 -->
+                <div class="flex-1">
+                    <!-- 面试题列表 -->
+                    <Spin :spinning="loading && !loadingMore">
+                        <div v-if="error" class="p-4 text-red-500">{{ error }}</div>
 
-
-            <!-- 题目列表 -->
-            <div class="flex-1">
-                <!-- 面试题列表 -->
-                <Spin :spinning="loading">
-                    <div v-if="error" class="p-4 text-red-500">{{ error }}</div>
-
-                    <div v-else-if="interviews.length === 0 && !loading"
-                        class="p-6 text-center text-gray-500 bg-gray-50 rounded-lg">
-                        没有找到相关面试题
-                    </div>
-
-                    <div v-else class="space-y-4">
-                        <Card v-for="interview in interviews" :key="interview.id" class="w-full interview-card"
-                            :bordered="true">
-                            <!-- 题目标题和难度 -->
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold">{{ interview.question }}</h3>
-                                <div class="flex gap-2 items-center">
-                                    <Tag :color="getDifficultyInfo(interview.difficulty).color">
-                                        {{ getDifficultyInfo(interview.difficulty).text }}
-                                    </Tag>
-                                    <Tag v-if="interview.requirePremium" color="gold">会员</Tag>
-                                </div>
-                            </div>
-
-                            <!-- 答案和切换按钮 -->
-                            <div class="pt-3 border-t">
-                                <div class="flex justify-between items-center">
-                                    <div class="text-sm text-gray-500">
-                                        分类：<Tag color="gold">{{ getCategoryName(interview.categoryId) }}</Tag>
-                                    </div>
-
-                                    <div class="flex gap-1 items-center text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
-                                        @click="toggleAnswer(interview)">
-                                        <EyeOutlined v-if="!answerVisibility[interview.id]" />
-                                        <EyeInvisibleOutlined v-else />
-                                        <span>{{ answerVisibility[interview.id] ? '隐藏答案' : '查看答案' }}</span>
-                                    </div>
-                                </div>
-
-                                <!-- 答案内容 -->
-                                <div v-if="answerVisibility[interview.id]" class="pt-4 mt-4 border-t">
-                                    <div v-if="interview.answer" class="p-4 whitespace-pre-wrap bg-gray-50 rounded-md">
-                                        <div class="mb-2 font-bold">答案：</div>
-                                        <MdPreview class="md-preview-custom" :modelValue="interview.answer" />
-                                    </div>
-                                    <div v-else class="p-4 text-gray-500 bg-gray-50 rounded-md">
-                                        {{ interview.requirePremium && !isPremium ? '此答案需要会员权限才能查看' : '加载中...' }}
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-
-                    <!-- 加载更多 -->
-                    <div v-if="interviews.length < total" class="my-6 text-center">
-                        <div class="py-3 text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
-                            @click="loadMore" :class="{ 'opacity-50 cursor-not-allowed': loading }">
-                            {{ loading ? '加载中...' : '加载更多' }}
+                        <div v-else-if="interviews.length === 0 && !loading"
+                            class="p-6 text-center text-gray-500 bg-gray-50 rounded-lg">
+                            没有找到相关面试题
                         </div>
-                    </div>
-                </Spin>
+
+                        <div v-else class="space-y-4">
+                            <Card v-for="interview in interviews" :key="interview.id"
+                                class="w-full border transition-all duration-300 hover:shadow-md" :bordered="true">
+                                <!-- 题目标题和难度 -->
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-bold">{{ interview.question }}</h3>
+                                    <div class="flex gap-2 items-center">
+                                        <Tag :color="getDifficultyInfo(interview.difficulty).color">
+                                            {{ getDifficultyInfo(interview.difficulty).text }}
+                                        </Tag>
+                                        <Tag v-if="interview.requirePremium" color="gold">会员</Tag>
+                                    </div>
+                                </div>
+
+                                <!-- 答案和切换按钮 -->
+                                <div class="pt-3 border-t">
+                                    <div class="flex justify-between items-center">
+                                        <div class="text-sm text-gray-500">
+                                            分类：<Tag color="gold">{{ getCategoryName(interview.categoryId) }}</Tag>
+                                        </div>
+
+                                        <div class="flex gap-1 items-center text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
+                                            @click="toggleAnswer(interview)">
+                                            <EyeOutlined v-if="!answerVisibility[interview.id]" />
+                                            <EyeInvisibleOutlined v-else />
+                                            <span>{{ answerVisibility[interview.id] ? '隐藏答案' : '查看答案' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 答案内容 -->
+                                    <div v-if="answerVisibility[interview.id]" class="pt-4 mt-4 border-t">
+                                        <div v-if="interview.answer" class="p-4 bg-gray-50 rounded-md">
+                                            <div class="mb-2 font-bold">答案：</div>
+                                            <MdPreview class="bg-gray-50" :modelValue="interview.answer" />
+                                        </div>
+                                        <div v-else class="p-4 text-gray-500 bg-gray-50 rounded-md">
+                                            {{ interview.requirePremium && !isPremium ? '此答案需要会员权限才能查看' : '加载中...' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+
+                        <!-- 加载更多/无更多数据 -->
+                        <div v-if="loadingMore" class="flex justify-center py-4">
+                            <a-spin />
+                        </div>
+                        <div v-else-if="!hasMore && interviews.length > 0" class="py-6 text-center text-gray-400">
+                            已经到底啦 ~
+                        </div>
+                        <div v-else-if="interviews.length > 0 && hasMore" class="my-6 text-center">
+                            <div class="py-3 text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
+                                @click="loadMore" :class="{ 'opacity-50 cursor-not-allowed': loadingMore }">
+                                加载更多
+                            </div>
+                        </div>
+                    </Spin>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
-.interview-card {
-    transition: all 0.3s ease;
+/* 隐藏滚动条但保持可滚动功能 */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+
+    &::-webkit-scrollbar {
+        display: none;
+        /* Chrome, Safari, Opera */
+    }
 }
 
-.interview-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* 吸顶效果 */
-.sticky {
-    position: sticky;
-    background-color: white;
-    border-bottom: none;
-}
-
-/* 自定义Tab样式 */
-.custom-tabs {
-    display: flex;
-    border-bottom: none;
-    margin-bottom: 1rem;
-}
-
-.tab-item {
-    padding: 0.5rem 1.5rem;
-    cursor: pointer;
-    position: relative;
-    font-size: 14px;
-    transition: all 0.2s;
-    border-radius: 4px;
-    margin-right: 0.25rem;
-}
-
-.tab-item:hover {
-    color: #1890ff;
-    background-color: rgba(24, 144, 255, 0.05);
-}
-
-.tab-item.active {
-    color: #1890ff;
-    font-weight: 500;
-    background-color: rgba(24, 144, 255, 0.1);
-}
-
-.tab-item.active::after {
-    display: none;
-}
-
-.difficulty-tabs .tab-item {
-    padding: 0.35rem 1.5rem;
-}
-
-.premium-tabs .tab-item {
-    padding: 0.35rem 1.2rem;
-}
-
+/* 保留背景色变量 */
 .bg-gray-50 {
     background-color: var(--color-gray-50);
 
     h2 {
         font-size: 20px;
-    }
-}
-
-/* Markdown 预览组件的自定义样式 */
-:deep(.md-preview-custom) {
-    /* 覆盖默认背景色 */
-    background-color: var(--color-gray-50) !important;
-    
-    /* 调整内部元素样式 */
-    .md-editor-preview-wrapper {
-        background-color: transparent !important;
-        padding: 0 !important;
-    }
-
-    /* 代码块样式 */
-    pre {
-        background-color: #f8f8f8 !important;
-        border-radius: 4px !important;
-        padding: 12px !important;
-        margin: 10px 0 !important;
-    }
-
-    /* 标题样式 */
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: 600 !important;
-        font-size: 20px;
-    }
-
-    /* 列表样式 */
-    ul, ol {
-        padding-left: 24px !important;
-        margin: 8px 0 !important;
-    }
-
-    /* 段落样式 */
-    p {
-        margin: 8px 0 !important;
-        line-height: 1.6 !important;
-    }
-
-    /* 表格样式 */
-    table {
-        border-collapse: collapse !important;
-        margin: 16px 0 !important;
-        width: 100% !important;
-    }
-
-    th, td {
-        border: 1px solid #ddd !important;
-        padding: 8px 12px !important;
-        text-align: left !important;
-    }
-
-    th {
-        background-color: #f0f0f0 !important;
-        font-weight: 600 !important;
-    }
-
-    /* 引用样式 */
-    blockquote {
-        border-left: 4px solid #1890ff !important;
-        padding-left: 16px !important;
-        margin: 16px 0 !important;
-        color: #666 !important;
-    }
-
-    /* 链接样式 */
-    a {
-        color: #1890ff !important;
-        text-decoration: none !important;
-    }
-
-    a:hover {
-        text-decoration: underline !important;
     }
 }
 </style>

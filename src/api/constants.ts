@@ -4,11 +4,14 @@
 export const categoryOptions = [
   { value: 1, label: 'JavaScript' },
   { value: 2, label: 'Vue' },
-  { value: 3, label: 'React' },
-  { value: 4, label: 'Node.js' },
-  { value: 5, label: '算法' },
-  { value: 6, label: '网络' },
-  { value: 7, label: '浏览器' }
+  { value: 3, label: 'HTML' },
+  { value: 4, label: 'CSS' },
+  { value: 5, label: 'TypeScript' },
+  { value: 6, label: 'React' },
+  { value: 7, label: 'Node.js' },
+  { value: 8, label: '算法' },
+  { value: 9, label: '网络' },
+  { value: 10, label: '浏览器' }
 ]
 
 /**
