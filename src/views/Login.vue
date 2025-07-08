@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { message } from 'ant-design-vue';
-import { UserOutlined, LockOutlined, GithubOutlined, QqOutlined, WeiboOutlined, MailOutlined } from '@ant-design/icons-vue';
+import { UserOutlined, LockOutlined, GithubOutlined, QqOutlined, WeiboOutlined, MailOutlined, SafetyOutlined } from '@ant-design/icons-vue';
 import type { FormState, RegisterFormState } from '@/types/form';
-import { login, register, githubLogin } from '@/api/auth';
+import { login, register, githubLogin, sendCode } from '@/api/auth';
 import { useUserStore } from '@/stores/userStore';
 
 const router = useRouter();
@@ -13,6 +13,11 @@ const loading = ref(false);
 const githubLoading = ref(false);
 const isLogin = ref(true);
 const userStore = useUserStore();
+
+// 验证码倒计时相关
+const isSending = ref(false);
+const countdown = ref(0);
+const countdownTimer = ref<number | null>(null);
 
 const formState = reactive<FormState>({
     email: '',
@@ -27,6 +32,17 @@ const registerFormState = reactive<RegisterFormState>({
     password: '',
     confirmPassword: '',
     agreement: false,
+    code: '',
+});
+
+// 计算倒计时按钮文本
+const countdownText = computed(() => {
+    return countdown.value > 0 ? `${countdown.value}秒后重新发送` : '发送验证码';
+});
+
+// 计算按钮是否禁用
+const isButtonDisabled = computed(() => {
+    return countdown.value > 0 || isSending.value;
 });
 
 const loginRules = {
@@ -63,6 +79,10 @@ const registerRules = {
                 return Promise.reject('两次输入的密码不一致');
             }, trigger: 'blur'
         },
+    ],
+    code: [
+        { required: true, message: '请输入验证码', trigger: 'blur' },
+        { len: 6, message: '验证码应为6位数字', trigger: 'blur' },
     ],
     agreement: [
         {
@@ -115,15 +135,74 @@ const handleRegisterSubmit = async () => {
     }
 };
 
+// 发送验证码
+const handleSendCode = async () => {
+    // 验证邮箱格式
+    if (!registerFormState.email) {
+        message.warning('请先输入邮箱');
+        return;
+    }
+    
+    const emailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+    if (!emailReg.test(registerFormState.email)) {
+        message.warning('请输入有效的邮箱地址');
+        return;
+    }
+    
+    try {
+        isSending.value = true;
+        const { data } = await sendCode(registerFormState.email);
+        if(!data.success) {
+            message.error(data.message || '发送验证码失败');
+            return;
+        }
+        
+        // 如果发送成功，开始倒计时
+        if (data.success) {
+            startCountdown();
+            message.success(data.message || '验证码已发送，请查收邮件');
+        }
+    } catch (error: any) {
+        message.error(error.message || '发送验证码失败');
+    } finally {
+        isSending.value = false;
+    }
+};
+
+// 开始倒计时
+const startCountdown = () => {
+    countdown.value = 60;
+    
+    // 清除可能存在的旧定时器
+    if (countdownTimer.value) {
+        clearInterval(countdownTimer.value);
+    }
+    
+    // 设置新的定时器
+    countdownTimer.value = window.setInterval(() => {
+        if (countdown.value > 0) {
+            countdown.value -= 1;
+        } else {
+            // 倒计时结束，清除定时器
+            if (countdownTimer.value) {
+                clearInterval(countdownTimer.value);
+                countdownTimer.value = null;
+            }
+        }
+    }, 1000);
+};
+
 const toggleForm = () => {
     isLogin.value = !isLogin.value;
 };
+
 function handleGithubLogin() {
     // 获取当前页面地址的域名
     const currentUrl = window.location.origin + '/#/login';
     const url = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${currentUrl}`;
     window.location.href = url;
 }
+
 // 跳转回登录页面，拿到code，进行登录
 async function handleGithubCallback() {
     const searchParams = new URLSearchParams(window.location.search);
@@ -149,8 +228,17 @@ async function handleGithubCallback() {
         router.push('/');
     }
 }
+
 onMounted(() => {
     handleGithubCallback();
+});
+
+// 组件卸载时清除定时器
+onUnmounted(() => {
+    if (countdownTimer.value) {
+        clearInterval(countdownTimer.value);
+        countdownTimer.value = null;
+    }
 });
 </script>
 
@@ -237,6 +325,29 @@ onMounted(() => {
                                 </template>
                             </a-input>
                         </a-form-item>
+                        
+                        <!-- 验证码输入框 -->
+                        <a-form-item name="code">
+                            <div class="flex">
+                                <a-input v-model:value="registerFormState.code" size="large" placeholder="验证码"
+                                    class="flex-1 login-input">
+                                    <template #prefix>
+                                        <SafetyOutlined class="text-gray-400" />
+                                    </template>
+                                </a-input>
+                                <a-button 
+                                    type="primary" 
+                                    size="large" 
+                                    :disabled="isButtonDisabled"
+                                    :loading="isSending"
+                                    @click="handleSendCode"
+                                    class="ml-2 w-35 verification-button"
+                                >
+                                    {{ countdownText }}
+                                </a-button>
+                            </div>
+                        </a-form-item>
+                        
                         <a-form-item name="password">
                             <a-input-password v-model:value="registerFormState.password" size="large" placeholder="密码"
                                 class="login-input">
@@ -327,6 +438,17 @@ onMounted(() => {
 }
 
 .login-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.verification-button {
+    @apply rounded-lg;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.verification-button:not(:disabled):hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }

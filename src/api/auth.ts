@@ -43,9 +43,9 @@ export function logout() {
 
 export function sendCode(email: string) {
     return request({
-        url: '/user/send-code',
+        url: '/verification/send',
         method: 'post',
-        data: { email },
+        data: { email, type: 'email_registration' },
     });
 }
 
@@ -55,4 +55,4 @@ export function validateCode(email: string, code: string) {
         method: 'post',
         data: { email, code },
     });
-} 
+}

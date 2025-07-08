@@ -11,6 +11,7 @@ export interface RegisterFormState {
     password: string;
     confirmPassword: string;
     agreement: boolean;
+    code: string;
 }
 
 export interface ResetFormState {
