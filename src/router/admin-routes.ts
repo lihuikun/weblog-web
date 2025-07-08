@@ -10,6 +10,18 @@ export interface Menu {
 // 需要主布局的路由配置
 const adminRoutes: Array<RouteRecordRaw> = [
     {
+        path: '/admin/interview-manage',
+        name: 'InterviewManage',
+        component: () => import('@/admin/InterviewManage.vue'),
+        meta: {
+            title: '面试题管理',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin', 'subAdmin'],
+            layout: 'admin'
+        },
+    },
+    {
         path: '/admin/user-manage',
         name: 'UserManage',
         component: () => import('@/admin/UserManage.vue'),
@@ -33,18 +45,7 @@ const adminRoutes: Array<RouteRecordRaw> = [
             layout: 'admin'
         },
     },
-    {
-        path: '/admin/interview-manage',
-        name: 'InterviewManage',
-        component: () => import('@/admin/InterviewManage.vue'),
-        meta: {
-            title: '面试题管理',
-            keepAlive: true,
-            requiresAuth: true,
-            roles: ['admin', 'subAdmin'],
-            layout: 'admin'
-        },
-    },
+    
 ];
 
 export default adminRoutes; 

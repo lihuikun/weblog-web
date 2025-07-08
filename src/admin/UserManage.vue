@@ -3,33 +3,56 @@ import { ref, onMounted } from 'vue'
 import { message, Button, Popconfirm } from 'ant-design-vue'
 import { getUserList, deleteUser, updateUserPartial } from '@/api/user'
 import { useDateFormatter } from '@/hooks/useDateFormatter'
+
 const users = ref([])
 const loading = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+const keyword = ref('')
 const editingUser = ref<any>(null)
 const showEditModal = ref(false)
 const editForm = ref<any>({})
+
 // 日期格式化hooks
 const { formatDate } = useDateFormatter()
+
 const fetchUsers = async () => {
     loading.value = true
-    const { data } = await getUserList({ page: page.value, pageSize: pageSize.value })
+    const { data } = await getUserList({ 
+        page: page.value, 
+        pageSize: pageSize.value,
+        keyword: keyword.value
+    })
     users.value = data.list
     total.value = data.total
     loading.value = false
 }
+
+// 处理搜索
+const handleSearch = () => {
+    page.value = 1
+    fetchUsers()
+}
+
+// 处理分页变化
+const handlePageChange = (newPage: number) => {
+    page.value = newPage
+    fetchUsers()
+}
+
 const handleDelete = async (id: number) => {
     await deleteUser(id)
     message.success('删除成功')
     fetchUsers()
 }
+
 const handleEdit = (user: any) => {
     editingUser.value = user
     editForm.value = { ...user }
     showEditModal.value = true
 }
+
 const handleUpdate = async () => {
     if (!editingUser.value) return
     await updateUserPartial(editingUser.value.id, editForm.value)
@@ -37,6 +60,7 @@ const handleUpdate = async () => {
     showEditModal.value = false
     fetchUsers()
 }
+
 const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: 'openId', dataIndex: 'openId', key: 'openId', width: 80 },
@@ -112,6 +136,7 @@ const columns = [
         }
     }
 ]
+
 const roleList = [
     {
         value: 'admin',
@@ -124,6 +149,7 @@ const roleList = [
         label: '用户',
     },
 ]
+
 const registerTypeList =
     [
         {
@@ -143,6 +169,7 @@ const registerTypeList =
             label: 'GitHub',
         }
     ]
+
 onMounted(fetchUsers)
 </script>
 
@@ -152,8 +179,34 @@ onMounted(fetchUsers)
         <!-- 右侧内容区 -->
         <div class="flex-1 pl-6">
             <h2 class="mb-4 text-xl font-bold text-white">用户管理</h2>
-            <ATable :dataSource="users" :loading="loading" rowKey="id" bordered :columns="columns">
+            
+            <!-- 搜索框 -->
+            <div class="mb-4 flex">
+                <AInput 
+                    v-model:value="keyword" 
+                    placeholder="请输入用户名或邮箱搜索" 
+                    class="w-64 mr-2"
+                    allowClear
+                    @pressEnter="handleSearch"
+                />
+                <AButton type="primary" @click="handleSearch">搜索</AButton>
+            </div>
+            
+            <ATable 
+                :dataSource="users" 
+                :loading="loading" 
+                rowKey="id" 
+                bordered 
+                :columns="columns"
+                :pagination="{
+                    current: page,
+                    pageSize: pageSize,
+                    total: total,
+                    onChange: handlePageChange
+                }"
+            >
             </ATable>
+            
             <!-- 编辑弹窗 -->
             <AModal v-model:open="showEditModal" title="编辑用户" @ok="handleUpdate">
                 <AForm :model="editForm">

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function getUserList(params: { page: number; pageSize: number }) {
+export function getUserList(params: { page: number; pageSize: number; keyword?: string }) {
     return request({ url: '/user/list', method: 'get', params })
 }
 export function deleteUser(id: number) {
