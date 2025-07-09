@@ -11,7 +11,9 @@ export const categoryOptions = [
   { value: 7, label: 'Node.js' },
   { value: 8, label: '算法' },
   { value: 9, label: '网络' },
-  { value: 10, label: '浏览器' }
+  { value: 10, label: '浏览器' },
+  { value: 11, label: 'Webpack' },
+  { value: 12, label: 'Vite' },
 ]
 
 /**
