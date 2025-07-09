@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { ref, onMounted, watch, computed, nextTick, onUnmounted, watchEffect } from 'vue'
 import { message, Spin, Card, Tabs, Switch, Tag } from 'ant-design-vue'
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue'
+import { EyeOutlined, EyeInvisibleOutlined, CrownOutlined } from '@ant-design/icons-vue'
 import { getInterviewList, getInterviewAnswer, Interview as InterviewType } from '@/api/interview'
 import { difficultyOptions, difficultyMap } from '@/api/constants'
 import { useUserStore } from '@/stores/userStore'
@@ -232,10 +232,28 @@ const checkUserIsPremium = () => {
     isPremium.value = userStore.userInfo?.isPremium || false
 }
 
-// 获取分类名称
+// 获取分类名称和颜色
 const getCategoryName = (categoryId: number) => {
     const category = menuOptions.value.find(item => item.key === categoryId.toString())
     return category?.label || '未分类'
+}
+
+// 获取分类颜色
+const getCategoryColor = (categoryId: number) => {
+    // 根据分类ID返回不同的颜色
+    const colorMap: Record<string, string> = {
+        '1': 'green',    // 前端
+        '2': 'blue',     // 后端
+        '3': 'purple',   // 算法
+        '4': 'orange',   // 数据库
+        '5': 'cyan',     // 网络
+        '6': 'magenta',  // 系统设计
+        '7': 'red',      // 项目管理
+        '8': 'volcano',  // DevOps
+        '9': 'gold',     // 软技能
+    }
+    
+    return colorMap[categoryId.toString()] || 'gold'
 }
 
 // 获取难度对应的文字和颜色
@@ -253,12 +271,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-4 flex flex-col h-[calc(100vh-64px)]">
+    <div class="p-4 flex flex-col h-full">
         <!-- 顶部固定的筛选栏 -->
-        <div class="pb-4 bg-white">
+        <div class="pb-4 bg-white xs:pb-1">
             <div class="pb-2 bg-white">
                 <!-- 难度选择Tab -->
-                <div class="flex mb-4 overflow-x-auto scrollbar-hide">
+                <div class="flex mb-4 xs:mb-1 overflow-x-auto scrollbar-hide">
                     <div v-for="option in [{ value: 0, label: '全部' }, ...difficultyOptions]" :key="option.value" :class="[
                         'px-6 py-1.5 cursor-pointer text-sm rounded mr-1 transition-colors whitespace-nowrap',
                         currentDifficulty == option.value
@@ -272,7 +290,7 @@ onMounted(() => {
 
             <!-- 会员/非会员选择 + 显示答案开关 -->
             <div class="flex justify-between items-center bg-white">
-                <div class="flex mb-4">
+                <div class="flex mb-4 xs:mb-1">
                     <div class="px-5 py-1.5 cursor-pointer text-sm rounded mr-1 transition-colors"
                         :class="{ 'bg-blue-50 text-blue-500 font-medium': requirePremium === '', 'hover:bg-blue-50 hover:text-blue-500': requirePremium !== '' }"
                         @click="requirePremium = ''">
@@ -291,7 +309,7 @@ onMounted(() => {
                 </div>
 
                 <div class="flex gap-2 items-center">
-                    <span>显示所有答案</span>
+                    <span class="xs:hidden">显示所有答案</span>
                     <Switch v-model:checked="showAllAnswers" @change="toggleAllAnswers" />
                 </div>
             </div>
@@ -313,15 +331,24 @@ onMounted(() => {
 
                         <div v-else class="space-y-4">
                             <Card v-for="interview in interviews" :key="interview.id"
-                                class="w-full border transition-all duration-300 hover:shadow-md" :bordered="true">
+                                class="w-full border transition-all duration-300 hover:shadow-md relative"
+                                :bordered="true">
+                                <!-- VIP角标 -->
+                                <div v-if="interview.requirePremium" class="absolute top-0 right-0 rounded-lg">
+                                    <div class="vip-corner">
+                                        <span class="vip-text">
+                                            VIP
+                                        </span>
+                                    </div>
+                                </div>
+
                                 <!-- 题目标题和难度 -->
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-lg font-bold">{{ interview.question }}</h3>
-                                    <div class="flex gap-2 items-center">
+                                    <div class="flex gap-2 items-center mr-2">
                                         <Tag :color="getDifficultyInfo(interview.difficulty).color">
                                             {{ getDifficultyInfo(interview.difficulty).text }}
                                         </Tag>
-                                        <Tag v-if="interview.requirePremium" color="gold">会员</Tag>
                                     </div>
                                 </div>
 
@@ -329,7 +356,8 @@ onMounted(() => {
                                 <div class="pt-3 border-t">
                                     <div class="flex justify-between items-center">
                                         <div class="text-sm text-gray-500">
-                                            分类：<Tag color="gold">{{ getCategoryName(interview.categoryId) }}</Tag>
+                                            分类：<Tag :color="getCategoryColor(interview.categoryId)">{{
+                                                getCategoryName(interview.categoryId) }}</Tag>
                                         </div>
 
                                         <div class="flex gap-1 items-center text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
@@ -343,7 +371,10 @@ onMounted(() => {
                                     <!-- 答案内容 -->
                                     <div v-if="answerVisibility[interview.id]" class="pt-4 mt-4 border-t">
                                         <div v-if="interview.answer" class="p-4 bg-gray-50 rounded-md">
-                                            <div class="mb-2 font-bold">答案：</div>
+                                            <div class="mb-3 text-blue-600 flex items-center">
+                                                <div class="w-1 h-5 bg-blue-500 rounded-full mr-2"></div>
+                                                回答
+                                            </div>
                                             <MdPreview class="bg-gray-50" :modelValue="interview.answer" />
                                         </div>
                                         <div v-else class="p-4 text-gray-500 bg-gray-50 rounded-md">
@@ -395,5 +426,27 @@ onMounted(() => {
     h2 {
         font-size: 20px;
     }
+}
+
+/* VIP角标样式 */
+.vip-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 40px 40px 0;
+    border-color: transparent #ff9800 transparent transparent;
+}
+
+.vip-text {
+    position: absolute;
+    top: 3px;
+    right: -35px;
+    transform: rotate(45deg);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
 }
 </style>

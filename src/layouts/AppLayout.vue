@@ -282,7 +282,7 @@ watch(isActive, () => {
             </a-layout-header>
 
             <!-- 主内容区 -->
-            <a-layout class="container px-4 py-6 mx-auto bg-transparent">
+            <a-layout class="container md:px-4 py-6 mx-auto bg-transparent">
                 <a-layout class="bg-transparent">
                     <!-- 左侧边栏 - 仅在大屏幕显示 -->
                     <a-layout-sider class="hidden bg-transparent md:block" width="200"
@@ -302,7 +302,7 @@ watch(isActive, () => {
 
                     <!-- 内容区域 -->
                     <div ref="contentRef"
-                        class="overflow-y-auto px-6 h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1 shadow-lg ml-[10px] rounded-lg">
+                        class="overflow-y-auto md:px-6 h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1 shadow-lg md:ml-[10px] rounded-lg">
                         <slot :sideMenuId="sideMenuId" />
                     </div>
                 </a-layout>
