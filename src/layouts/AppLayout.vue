@@ -56,7 +56,7 @@ const sideMenuId = ref<string[]>(
 
 // 导航菜单项
 const navItems = [
-    { key: 'interview', label: '面试题库', path: '/interview', isNew: true },
+    { key: 'interview', label: '面试题库', path: '/', isNew: true },
     { key: 'hot-search', label: '热搜榜', path: '/hot-search' },
     { key: 'game', label: '摸鱼小游戏', path: '/game' },
     { key: 'dream', label: '集梦盒子', path: '/dream' },

@@ -2,6 +2,7 @@
  * 面试题分类选项
  */
 export const categoryOptions = [
+  { value: 0, label: 'AI' },
   { value: 1, label: 'JavaScript' },
   { value: 2, label: 'Vue' },
   { value: 3, label: 'HTML' },

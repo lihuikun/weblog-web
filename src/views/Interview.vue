@@ -7,6 +7,7 @@ import { difficultyOptions, difficultyMap } from '@/api/constants'
 import { useUserStore } from '@/stores/userStore'
 import { useRoute, useRouter } from 'vue-router'
 import { MdPreview } from 'md-editor-v3'
+import { useDateFormatter } from '@/hooks/useDateFormatter'
 import 'md-editor-v3/lib/preview.css';
 // 路由相关
 const route = useRoute()
@@ -32,6 +33,9 @@ const pageSize = ref(10)
 const total = ref(0)
 const hasMore = ref(true)
 const isInitialized = ref(false) // 添加初始化标志
+
+// 日期格式化
+const { formatDate } = useDateFormatter()
 
 // 筛选条件
 const currentDifficulty = ref<number | string>(0) // 0 表示全部
@@ -355,9 +359,10 @@ onMounted(() => {
                                 <!-- 答案和切换按钮 -->
                                 <div class="pt-3 border-t">
                                     <div class="flex justify-between items-center">
-                                        <div class="text-sm text-gray-500">
+                                        <div class="text-sm text-gray-500 flex items-center gap-3">
                                             分类：<Tag :color="getCategoryColor(interview.categoryId)">{{
                                                 getCategoryName(interview.categoryId) }}</Tag>
+                                            <span class="text-gray-400">{{ formatDate(interview.createTime, 'date') }}</span>
                                         </div>
 
                                         <div class="flex gap-1 items-center text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
