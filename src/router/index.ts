@@ -17,7 +17,7 @@ const mainRoutes: Array<RouteRecordRaw> = [
     name: 'Interview',
     component: () => import('@/views/Interview.vue'),
     meta: {
-      title: '面试题库',
+      title: '前端宝典',
       keepAlive: true,
       requiresAuth: false,
       layout: 'default',
