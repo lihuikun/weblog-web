@@ -199,7 +199,7 @@ const toggleForm = () => {
 function handleGithubLogin() {
     // 获取当前页面地址的域名
     const currentUrl = window.location.origin + '/#/login';
-    const url = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=${currentUrl}`;
+    const url = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_JS_DAILY_GITHUB_CLIENT_ID}&redirect_uri=${currentUrl}`;
     window.location.href = url;
 }
 

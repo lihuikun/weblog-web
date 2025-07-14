@@ -14,7 +14,7 @@ export function githubLogin(code: string) {
     return request({
         url: '/user/github/login',
         method: 'post',
-        data: { code },
+        data: { code, type: 'js-daily' },
     });
 }
 
