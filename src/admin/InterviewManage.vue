@@ -18,6 +18,7 @@ import {
 } from '@/api/constants'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
+import FullScreenModal from '@/components/FullScreenModal.vue'
 
 // 前端宝典列表数据
 const interviews = ref<Interview[]>([])
@@ -244,7 +245,11 @@ const columns = [
         }
     }
 ]
-
+function handleTitleChange(value: string | undefined) {
+    if (value) {
+        formData.value.question = value
+    }
+}
 // 组件挂载时加载数据
 onMounted(fetchInterviews)
 </script>
@@ -288,23 +293,27 @@ onMounted(fetchInterviews)
                 }" />
 
             <!-- 编辑/新增弹窗 -->
-            <AModal v-model:open="showModal" :title="isEdit ? '编辑前端宝典' : '新增前端宝典'" @ok="handleSubmit" width="800px">
+            <FullScreenModal v-model:open="showModal" :title="isEdit ? '编辑前端宝典' : '新增前端宝典'" @ok="handleSubmit">
                 <AForm :model="formData" layout="vertical">
                     <AFormItem label="标题" required>
-                        <AInput v-model:value="formData.title" placeholder="请输入标题" />
+                        <AInput v-model:value="formData.title" placeholder="请输入标题"
+                            @change="handleTitleChange(formData.title)" />
                     </AFormItem>
 
                     <AFormItem label="分类" required>
-                        <ASelect v-model:value="formData.categoryId" :options="categoryOptions" placeholder="请选择分类" />
+                        <ARadioGroup v-model:value="formData.categoryId" class="flex flex-wrap gap-2"
+                            optionType="button" :options="categoryOptions" />
+                        <!-- <ASelect v-model:value="formData.categoryId" :options="categoryOptions" placeholder="请选择分类" /> -->
                     </AFormItem>
 
                     <AFormItem label="难度" required>
-                        <ASelect v-model:value="formData.difficulty" :options="difficultyOptions" placeholder="请选择难度" />
+                        <ARadioGroup v-model:value="formData.difficulty" class="flex flex-wrap gap-2"
+                            optionType="button" :options="difficultyOptions" />
                     </AFormItem>
-
+                    <!-- 
                     <AFormItem label="问题内容" required>
                         <ATextarea v-model:value="formData.question" :rows="5" placeholder="请输入问题内容" />
-                    </AFormItem>
+                    </AFormItem> -->
 
                     <AFormItem label="答案" required>
                         <MdEditor v-model="formData.answer" style="height: 350px" />
@@ -313,7 +322,11 @@ onMounted(fetchInterviews)
                         <ASwitch v-model:checked="formData.requirePremium" />
                     </AFormItem>
                 </AForm>
-            </AModal>
+            </FullScreenModal>
         </div>
     </div>
 </template>
+
+<style lang="scss">
+/* Removed the modal styles since they are now in the FullScreenModal component */
+</style>

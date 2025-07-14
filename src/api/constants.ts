@@ -3,18 +3,20 @@
  */
 export const categoryOptions = [
   { value: 0, label: 'AI' },
-  { value: 1, label: 'JavaScript' },
-  { value: 2, label: 'Vue' },
   { value: 3, label: 'HTML' },
   { value: 4, label: 'CSS' },
+  { value: 1, label: 'JavaScript' },
   { value: 5, label: 'TypeScript' },
+  { value: 2, label: 'Vue' },
   { value: 6, label: 'React' },
   { value: 7, label: 'Node.js' },
+  { value: 11, label: 'Webpack / Vite' },
   { value: 8, label: '算法' },
   { value: 9, label: '网络' },
   { value: 10, label: '浏览器' },
-  { value: 11, label: 'Webpack' },
-  { value: 12, label: 'Vite' },
+  { value: 13, label: 'Nginx' },
+  { value: 14, label: 'Git' },
+  { value: 15, label: 'Docker' },
 ]
 
 /**

@@ -11,6 +11,7 @@ declare module 'vue' {
     DreamAnalysisModal: typeof import('./src/components/dream/components/DreamAnalysisModal.vue')['default']
     DreamForm: typeof import('./src/components/dream/components/DreamForm.vue')['default']
     DreamHall: typeof import('./src/components/dream/DreamHall.vue')['default']
+    FullScreenModal: typeof import('./src/components/FullScreenModal.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     MyDream: typeof import('./src/components/dream/MyDream.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
