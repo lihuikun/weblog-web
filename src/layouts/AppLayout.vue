@@ -210,7 +210,7 @@ watch(isActive, () => {
                                 <router-link to="/login">
                                     <a-button type="primary">登录</a-button>
                                 </router-link>
-                                <router-link to="/register">
+                                <router-link to="/login?type=register">
                                     <a-button>注册</a-button>
                                 </router-link>
                             </div>
@@ -263,7 +263,7 @@ watch(isActive, () => {
                                 <router-link to="/login">
                                     <a-button type="primary" size="small">登录</a-button>
                                 </router-link>
-                                <router-link to="/register">
+                                <router-link to="/login?type=register">
                                     <a-button size="small">注册</a-button>
                                 </router-link>
                             </div>

@@ -313,8 +313,11 @@ onMounted(() => {
                 </div>
 
                 <div class="flex gap-2 items-center">
-                    <span class="xs:hidden">显示所有答案</span>
+                    <span class="xs:hidden md:block">显示所有答案</span>
                     <Switch v-model:checked="showAllAnswers" @change="toggleAllAnswers" />
+                    <div class="text-sm text-gray-500 xs:hidden md:block">
+                        总题数: {{ total }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -362,7 +365,8 @@ onMounted(() => {
                                         <div class="text-sm text-gray-500 flex items-center gap-3">
                                             分类：<Tag :color="getCategoryColor(interview.categoryId)">{{
                                                 getCategoryName(interview.categoryId) }}</Tag>
-                                            <span class="text-gray-400">{{ formatDate(interview.createTime, 'date') }}</span>
+                                            <span class="text-gray-400">{{ formatDate(interview.createTime, 'date')
+                                                }}</span>
                                         </div>
 
                                         <div class="flex gap-1 items-center text-blue-500 transition-colors cursor-pointer hover:text-blue-700"

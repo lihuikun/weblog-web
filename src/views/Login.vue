@@ -231,6 +231,10 @@ async function handleGithubCallback() {
 
 onMounted(() => {
     handleGithubCallback();
+    // 如果type为register，则设置isLogin为false
+    if (route.query.type === 'register') {
+        isLogin.value = false;
+    }
 });
 
 // 组件卸载时清除定时器
