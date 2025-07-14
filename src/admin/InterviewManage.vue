@@ -19,7 +19,7 @@ import {
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 
-// 面试题列表数据
+// 前端宝典列表数据
 const interviews = ref<Interview[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -47,7 +47,7 @@ const requirePremium = ref<boolean | undefined>(undefined)
 // 日期格式化hooks
 const { formatDate } = useDateFormatter()
 
-// 获取面试题列表
+// 获取前端宝典列表
 const fetchInterviews = async () => {
     loading.value = true
     try {
@@ -61,26 +61,26 @@ const fetchInterviews = async () => {
         interviews.value = data.list
         total.value = data.total
     } catch (error) {
-        console.error('获取面试题列表失败:', error)
-        message.error('获取面试题列表失败')
+        console.error('获取前端宝典列表失败:', error)
+        message.error('获取前端宝典列表失败')
     } finally {
         loading.value = false
     }
 }
 
-// 删除面试题
+// 删除前端宝典
 const handleDelete = async (id: number) => {
     try {
         await deleteInterview(id)
         message.success('删除成功')
         fetchInterviews()
     } catch (error) {
-        console.error('删除面试题失败:', error)
-        message.error('删除面试题失败')
+        console.error('删除前端宝典失败:', error)
+        message.error('删除前端宝典失败')
     }
 }
 
-// 打开编辑面试题表单
+// 打开编辑前端宝典表单
 const handleEdit = (interview: Interview) => {
     isEdit.value = true
     editingInterview.value = interview
@@ -95,7 +95,7 @@ const handleEdit = (interview: Interview) => {
     showModal.value = true
 }
 
-// 打开新建面试题表单
+// 打开新建前端宝典表单
 const handleAdd = () => {
     isEdit.value = false
     editingInterview.value = null
@@ -114,11 +114,11 @@ const handleAdd = () => {
 const handleSubmit = async () => {
     try {
         if (isEdit.value && editingInterview.value) {
-            // 更新面试题
+            // 更新前端宝典
             await updateInterview(editingInterview.value.id, formData.value)
             message.success('更新成功')
         } else {
-            // 创建面试题
+            // 创建前端宝典
             await createInterview(formData.value as CreateInterviewDto)
             message.success('创建成功')
         }
@@ -252,7 +252,7 @@ onMounted(fetchInterviews)
 <template>
     <div class="flex p-6 h-full bg-white rounded-xl shadow">
         <div class="flex-1">
-            <h2 class="mb-4 text-xl font-bold text-white">面试题管理</h2>
+            <h2 class="mb-4 text-xl font-bold text-white">前端宝典管理</h2>
 
             <!-- 筛选区域 -->
             <div class="p-4 mb-4 bg-gray-50 rounded-md">
@@ -274,7 +274,7 @@ onMounted(fetchInterviews)
 
                     <AButton type="primary" @click="handleFilter">筛选</AButton>
                     <AButton @click="resetFilter">重置</AButton>
-                    <AButton type="primary" @click="handleAdd">新增面试题</AButton>
+                    <AButton type="primary" @click="handleAdd">新增前端宝典</AButton>
                 </div>
             </div>
 
@@ -288,7 +288,7 @@ onMounted(fetchInterviews)
                 }" />
 
             <!-- 编辑/新增弹窗 -->
-            <AModal v-model:open="showModal" :title="isEdit ? '编辑面试题' : '新增面试题'" @ok="handleSubmit" width="800px">
+            <AModal v-model:open="showModal" :title="isEdit ? '编辑前端宝典' : '新增前端宝典'" @ok="handleSubmit" width="800px">
                 <AForm :model="formData" layout="vertical">
                     <AFormItem label="标题" required>
                         <AInput v-model:value="formData.title" placeholder="请输入标题" />

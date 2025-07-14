@@ -14,7 +14,7 @@ const adminRoutes: Array<RouteRecordRaw> = [
         name: 'InterviewManage',
         component: () => import('@/admin/InterviewManage.vue'),
         meta: {
-            title: '面试题管理',
+            title: '前端宝典管理',
             keepAlive: true,
             requiresAuth: true,
             roles: ['admin', 'subAdmin'],

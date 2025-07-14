@@ -23,7 +23,7 @@ const menuOptions = computed(() => {
 const userStore = useUserStore()
 const isPremium = ref(false) // 是否是会员用户
 
-// 面试题列表
+// 前端宝典列表
 const interviews = ref<InterviewType[]>([])
 const loading = ref(false)
 const loadingMore = ref(false)
@@ -52,7 +52,7 @@ const initFromRoute = () => {
 // 记录每个题目答案的显示状态
 const answerVisibility = ref<Record<number, boolean>>({})
 
-// 获取面试题列表
+// 获取前端宝典列表
 const fetchInterviews = async (isLoadMore = false) => {
     // 防止重复请求
     if ((isLoadMore && loadingMore.value) || (!isLoadMore && loading.value)) return
@@ -96,16 +96,16 @@ const fetchInterviews = async (isLoadMore = false) => {
         total.value = data.total
         hasMore.value = interviews.value.length < total.value
     } catch (err) {
-        console.error('获取面试题列表失败:', err)
-        error.value = '获取面试题列表失败'
-        message.error('获取面试题列表失败')
+        console.error('获取前端宝典列表失败:', err)
+        error.value = '获取前端宝典列表失败'
+        message.error('获取前端宝典列表失败')
     } finally {
         loading.value = false
         loadingMore.value = false
     }
 }
 
-// 加载更多面试题
+// 加载更多前端宝典
 const loadMore = async () => {
     // 如果正在加载或没有更多数据，直接返回
     if (loadingMore.value || !hasMore.value) return
@@ -148,7 +148,7 @@ const toggleAnswer = async (interview: InterviewType) => {
         const answer = await getAnswer(interview.id)
 
         if (answer) {
-            // 更新面试题对象，添加答案
+            // 更新前端宝典对象，添加答案
             const index = interviews.value.findIndex(item => item.id === interview.id)
             if (index !== -1) {
                 interviews.value[index] = {
@@ -324,13 +324,13 @@ onMounted(() => {
             <div class="flex flex-wrap gap-6 mt-4 md:flex-nowrap">
                 <!-- 题目列表 -->
                 <div class="flex-1">
-                    <!-- 面试题列表 -->
+                    <!-- 前端宝典列表 -->
                     <Spin :spinning="loading && !loadingMore">
                         <div v-if="error" class="p-4 text-red-500">{{ error }}</div>
 
                         <div v-else-if="interviews.length === 0 && !loading"
                             class="p-6 text-center text-gray-500 bg-gray-50 rounded-lg">
-                            没有找到相关面试题
+                            没有找到相关前端宝典
                         </div>
 
                         <div v-else class="space-y-4">

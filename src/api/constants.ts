@@ -1,5 +1,5 @@
 /**
- * 面试题分类选项
+ * 前端宝典分类选项
  */
 export const categoryOptions = [
   { value: 0, label: 'AI' },
@@ -18,7 +18,7 @@ export const categoryOptions = [
 ]
 
 /**
- * 面试题难度选项
+ * 前端宝典难度选项
  */
 export const difficultyOptions = [
   { value: 1, label: '简单' },
@@ -28,7 +28,7 @@ export const difficultyOptions = [
 ]
 
 /**
- * 面试题难度对应的颜色和文字
+ * 前端宝典难度对应的颜色和文字
  */
 export const difficultyMap = {
   1: { color: 'green', text: '简单' },

@@ -36,7 +36,7 @@ export interface UpdateInterviewDto {
     requirePremium?: boolean;
 }
 
-// 获取面试题列表
+// 获取前端宝典列表
 export function getInterviewList(params: {
     page: number;
     pageSize: number;
@@ -51,7 +51,7 @@ export function getInterviewList(params: {
     })
 }
 
-// 获取面试题详情
+// 获取前端宝典详情
 export function getInterview(id: number) {
     return request({
         url: `/interviews/${id}`,
@@ -59,7 +59,7 @@ export function getInterview(id: number) {
     })
 }
 
-// 获取面试题答案
+// 获取前端宝典答案
 export function getInterviewAnswer(id: number) {
     return request({
         url: `/interviews/${id}/answer`,
@@ -67,7 +67,7 @@ export function getInterviewAnswer(id: number) {
     })
 }
 
-// 创建面试题
+// 创建前端宝典
 export function createInterview(data: CreateInterviewDto) {
     return request({
         url: '/interviews',
@@ -76,7 +76,7 @@ export function createInterview(data: CreateInterviewDto) {
     })
 }
 
-// 更新面试题
+// 更新前端宝典
 export function updateInterview(id: number, data: UpdateInterviewDto) {
     return request({
         url: `/interviews/${id}`,
@@ -85,7 +85,7 @@ export function updateInterview(id: number, data: UpdateInterviewDto) {
     })
 }
 
-// 删除面试题
+// 删除前端宝典
 export function deleteInterview(id: number) {
     return request({
         url: `/interviews/${id}`,
