@@ -275,7 +275,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-4 flex flex-col h-full">
+    <div v-no-copy class="p-4 flex flex-col h-full">
         <!-- 顶部固定的筛选栏 -->
         <div class="pb-4 bg-white xs:pb-1">
             <div class="pb-2 bg-white">
