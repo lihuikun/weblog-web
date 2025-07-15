@@ -459,4 +459,11 @@ onMounted(() => {
     font-size: 12px;
     font-weight: bold;
 }
+// md编辑器限制图片宽度
+// :deep(.md-editor-preview-wrapper img),
+// :deep(.md-editor-content img) {
+//     width: 200px !important;
+//     height: auto;
+//     object-fit: contain;
+// }
 </style>

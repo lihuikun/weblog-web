@@ -213,11 +213,25 @@ export function useUploadImage() {
             loading.value = false;
         }
     };
+    // md编辑器上传图片
+    const uploadImage = async (files: File[], callback: (arg0: string[]) => void) => {
+        const results = []
+
+        for (const file of files) {
+            const url = await uploadImg(file)
+            if (url) {
+                results.push(url)
+            }
+        }
+
+        callback(results)
+    }
     return {
         loading,
         imageList,
         afterUpload,
-        uploadImg
+        uploadImg,
+        uploadImage
     };
 }
 

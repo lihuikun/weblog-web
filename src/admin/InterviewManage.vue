@@ -19,6 +19,7 @@ import {
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import FullScreenModal from '@/components/FullScreenModal.vue'
+import { useUploadImage } from '@/hooks/useUploadImage'
 
 // 前端宝典列表数据
 const interviews = ref<Interview[]>([])
@@ -47,6 +48,7 @@ const requirePremium = ref<boolean | undefined>(undefined)
 
 // 日期格式化hooks
 const { formatDate } = useDateFormatter()
+const { uploadImage } = useUploadImage()
 
 // 获取前端宝典列表
 const fetchInterviews = async () => {
@@ -316,7 +318,7 @@ onMounted(fetchInterviews)
                     </AFormItem> -->
 
                     <AFormItem label="答案" required>
-                        <MdEditor v-model="formData.answer" style="height: 350px" />
+                        <MdEditor v-model="formData.answer" style="height: 350px" :on-upload-img="uploadImage" />
                     </AFormItem>
                     <AFormItem label="会员专属" required>
                         <ASwitch v-model:checked="formData.requirePremium" />
