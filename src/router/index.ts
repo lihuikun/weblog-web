@@ -115,6 +115,17 @@ const mainRoutes: Array<RouteRecordRaw> = [
       layout: 'default',
     },
   },
+  {
+    path: '/link',
+    name: 'Link',
+    component: () => import('../views/link.vue'),
+    meta: {
+      title: '友情链接',
+      keepAlive: true,
+      requiresAuth: true,
+      layout: 'default',
+    },
+  },
 ];
 
 // 404路由

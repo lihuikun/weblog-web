@@ -61,6 +61,7 @@ const navItems = [
     { key: 'game', label: '摸鱼小游戏', path: '/game' },
     { key: 'dream', label: '集梦盒子', path: '/dream' },
     { key: 'daily-quote', label: '每日一句', path: '/daily-quote' },
+    { key: 'link', label: '友情链接', path: '/link' },
 ];
 
 
@@ -285,8 +286,9 @@ watch(isActive, () => {
             <a-layout class="container md:px-4 py-6 mx-auto bg-transparent">
                 <a-layout class="bg-transparent">
                     <!-- 左侧边栏 - 仅在大屏幕显示 -->
-                    <a-layout-sider class="hidden bg-transparent md:block" width="200"
-                        :style="{ background: 'transparent' }" breakpoint="lg" collapsed-width="0">
+                    <a-layout-sider v-if="sideMenuItems && (sideMenuItems as Menu[])?.length !== 0"
+                        class="hidden bg-transparent md:block" width="200" :style="{ background: 'transparent' }"
+                        breakpoint="lg" collapsed-width="0">
                         <a-menu mode="inline" v-model:selectedKeys="sideMenuId" class="bg-white rounded-lg shadow-sm"
                             style="height: 100%" @click="handleMenuClick">
                             <a-menu-item v-for="item in (sideMenuItems as Menu[])" :key="item.key">
