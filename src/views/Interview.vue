@@ -447,6 +447,7 @@ onMounted(() => {
     border-style: solid;
     border-width: 0 40px 40px 0;
     border-color: transparent #ff9800 transparent transparent;
+    border-radius: 0 8px 0 0;
 }
 
 .vip-text {

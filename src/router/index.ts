@@ -17,7 +17,9 @@ const mainRoutes: Array<RouteRecordRaw> = [
     name: 'Interview',
     component: () => import('@/views/Interview.vue'),
     meta: {
-      title: '前端宝典',
+      title: '前端宝典 - 前端开发面试题库与技术问答',
+      description: '收录最新前端开发面试题与技术问答，助力开发者提升技能和准备面试',
+      keywords: '前端宝典,前端面试题,前端开发,Vue,React,JavaScript,HTML,CSS,前端技术',
       keepAlive: true,
       requiresAuth: false,
       layout: 'default',
@@ -140,7 +142,32 @@ const router = createRouter({
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
   // 设置页面标题
-  document.title = `${to.meta.title as string || '默认标题'}`;
+  document.title = `${to.meta.title as string || '前端宝典'} | 前端的日常`;
+  
+  // 设置动态meta标签
+  const metaDescription = to.meta.description as string || '前端宝典 - 收录前端开发面试题、技术问答、学习资料，帮助开发者提升技能和准备面试';
+  const metaKeywords = to.meta.keywords as string || '前端宝典,前端面试题,前端开发,Vue,React,JavaScript,HTML,CSS,前端技术,web开发,面试准备';
+  
+  // 更新meta标签
+  let descriptionMeta = document.querySelector('meta[name="description"]');
+  if (descriptionMeta) {
+    descriptionMeta.setAttribute('content', metaDescription);
+  } else {
+    descriptionMeta = document.createElement('meta');
+    descriptionMeta.setAttribute('name', 'description');
+    descriptionMeta.setAttribute('content', metaDescription);
+    document.head.appendChild(descriptionMeta);
+  }
+  
+  let keywordsMeta = document.querySelector('meta[name="keywords"]');
+  if (keywordsMeta) {
+    keywordsMeta.setAttribute('content', metaKeywords);
+  } else {
+    keywordsMeta = document.createElement('meta');
+    keywordsMeta.setAttribute('name', 'keywords');
+    keywordsMeta.setAttribute('content', metaKeywords);
+    document.head.appendChild(keywordsMeta);
+  }
 
   // 判断是否需要登录权限
   if (to.meta.requiresAuth) {
@@ -156,7 +183,6 @@ router.beforeEach((to, from, next) => {
 
     // 检查角色权限
     const requiredRoles = to.meta.roles;
-    console.log("🚀 ~ router.beforeEach ~ requiredRoles:", requiredRoles)
     if (requiredRoles && Array.isArray(requiredRoles) && requiredRoles.length > 0) {
       const hasPermission = requiredRoles.some(role => userStore.roles.includes(role));
       if (!hasPermission) {
