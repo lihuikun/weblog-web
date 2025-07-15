@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /login
 Disallow: /forgot-password
 
-Sitemap: https://js-dayly.lihk.top/sitemap.xml 
+Sitemap: https://js-daily.lihk.top/sitemap.xml 
