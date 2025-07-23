@@ -192,30 +192,28 @@ const toggleAllAnswers = () => {
         })
     }
 }
-
-// 监听筛选条件变化
-watch([currentDifficulty, requirePremium], () => {
+function initData(){
     page.value = 1 // 重置页码
     interviews.value = [] // 清空当前列表
     answerVisibility.value = {} // 重置答案显示状态
     fetchInterviews() // 重新加载数据
+}
+// 监听筛选条件变化
+watch([currentDifficulty, requirePremium], () => {
+    console.log('121212', 121212)
+    initData()
 })
 
 const { sideMenuId } = defineProps<{ sideMenuId: string[] }>();
+console.log('sideMenuId', sideMenuId)
 // 监听路由变化
 watch(() => sideMenuId[0], () => {
     // 避免重复初始化
-    if (isInitialized.value && sideMenuId[0] === selectedCategory.value) {
-        return
-    }
-
     console.log('初始化数据', sideMenuId)
     selectedCategory.value = sideMenuId[0]
-    page.value = 1
-    interviews.value = []
-    answerVisibility.value = {}
-    isInitialized.value = true
-    fetchInterviews()
+    initData()
+},{
+    immediate:true
 })
 
 // 监听页面滚动，实现无限加载
@@ -297,6 +295,7 @@ const handleFavorite = async (interview: InterviewType) => {
 onMounted(() => {
     initFromRoute()
     checkUserIsPremium()
+    // fetchInterviews()
 })
 
 
