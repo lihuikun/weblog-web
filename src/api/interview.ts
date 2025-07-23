@@ -16,6 +16,10 @@ export interface Interview {
     requirePremium: boolean;
     createTime: string;
     updateTime: string;
+    isFavorited: boolean; // 是否已收藏
+    isLiked: boolean;     // 是否已点赞
+    likeCount: number;    // 点赞数量
+    favoriteCount: number; // 收藏数量
 }
 
 export interface CreateInterviewDto {
@@ -90,5 +94,20 @@ export function deleteInterview(id: number) {
     return request({
         url: `/interviews/${id}`,
         method: 'delete'
+    })
+}
+
+// 收藏前端宝典
+export function favoriteInterview(id: number) {
+    return request({
+        url: `/favorite/interview/${id}`,
+        method: 'post'
+    })
+}
+// 点赞前端宝典
+export function likeInterview(id: number) {
+    return request({
+        url: `/like/interview/${id}`,
+        method: 'post'
     })
 } 

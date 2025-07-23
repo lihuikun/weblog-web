@@ -64,8 +64,6 @@ const showHomeButton = computed(() => !!props.homeButton)
         <template #overlay>
             <AMenu>
                 <AMenuItem key="1">我的主页</AMenuItem>
-                <AMenuItem key="2">我的收藏</AMenuItem>
-                <AMenuItem key="3">我的设置</AMenuItem>
                 <!-- 仅在非管理页面显示管理入口 -->
                 <AMenuItem v-if="isAdmin && !showHomeButton" key="admin" @click="goToAdmin">后台管理</AMenuItem>
                 <!-- 根据模式显示不同的按钮 -->

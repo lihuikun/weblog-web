@@ -1,8 +1,8 @@
 <script setup lang="tsx">
 import { ref, onMounted, watch, computed, nextTick, onUnmounted, watchEffect } from 'vue'
 import { message, Spin, Card, Tabs, Switch, Tag } from 'ant-design-vue'
-import { EyeOutlined, EyeInvisibleOutlined, CrownOutlined } from '@ant-design/icons-vue'
-import { getInterviewList, getInterviewAnswer, Interview as InterviewType } from '@/api/interview'
+import { EyeOutlined, EyeInvisibleOutlined, CrownOutlined, LikeOutlined, LikeFilled, StarOutlined, StarFilled } from '@ant-design/icons-vue'
+import { getInterviewList, getInterviewAnswer, Interview as InterviewType, favoriteInterview, likeInterview } from '@/api/interview'
 import { difficultyOptions, difficultyMap } from '@/api/constants'
 import { useUserStore } from '@/stores/userStore'
 import { useRoute, useRouter } from 'vue-router'
@@ -109,7 +109,7 @@ const fetchInterviews = async (isLoadMore = false) => {
 const loadMore = async () => {
     // 如果正在加载或没有更多数据，直接返回
     if (loadingMore.value || !hasMore.value) return
-    
+
     page.value++
     await fetchInterviews(true)
 }
@@ -208,7 +208,7 @@ watchEffect(() => {
     if (isInitialized.value && sideMenuId[0] === selectedCategory.value) {
         return
     }
-    
+
     console.log('初始化数据', sideMenuId)
     selectedCategory.value = sideMenuId[0]
     page.value = 1
@@ -224,7 +224,7 @@ const scrollContainer = ref<HTMLElement | null>(null)
 const handleScroll = (e: Event) => {
     const element = e.target as HTMLElement
     const scrollBottom = element.scrollHeight - element.scrollTop - element.clientHeight
-    
+
     // 当滚动到距离底部 100px 时加载更多
     if (scrollBottom < 100 && !loadingMore.value && hasMore.value) {
         loadMore()
@@ -256,7 +256,7 @@ const getCategoryColor = (categoryId: number) => {
         '8': 'volcano',  // DevOps
         '9': 'gold',     // 软技能
     }
-    
+
     return colorMap[categoryId.toString()] || 'gold'
 }
 
@@ -264,6 +264,33 @@ const getCategoryColor = (categoryId: number) => {
 const getDifficultyInfo = (difficulty: number) => {
     const info = difficultyMap[difficulty as keyof typeof difficultyMap]
     return info || { color: 'default', text: '未知' }
+}
+
+// 点赞和收藏操作（仅UI，后续可接API）
+const handleLike = async (interview: InterviewType) => {
+    if (!userStore.token) {
+        message.warning('请先登录')
+        return
+    }
+    try {
+        await likeInterview(interview.id)
+        interview.isLiked = !interview.isLiked
+        interview.likeCount += interview.isLiked ? 1 : -1
+    } catch (e) {
+        message.error('操作失败')
+    }
+}
+const handleFavorite = async (interview: InterviewType) => {
+    if (!userStore.token) {
+        message.warning('请先登录')
+        return
+    }
+    try {
+        await favoriteInterview(interview.id)
+        interview.isFavorited = !interview.isFavorited
+    } catch (e) {
+        message.error('操作失败')
+    }
 }
 
 onMounted(() => {
@@ -338,8 +365,7 @@ onMounted(() => {
 
                         <div v-else class="space-y-4">
                             <Card v-for="interview in interviews" :key="interview.id"
-                                class="w-full border transition-all duration-300 hover:shadow-md relative"
-                                :bordered="true">
+                                class="w-full border transition-all duration-300 hover:shadow-md relative" :bordered="true">
                                 <!-- VIP角标 -->
                                 <div v-if="interview.requirePremium" class="absolute top-0 right-0 rounded-lg">
                                     <div class="vip-corner">
@@ -366,7 +392,7 @@ onMounted(() => {
                                             分类：<Tag :color="getCategoryColor(interview.categoryId)">{{
                                                 getCategoryName(interview.categoryId) }}</Tag>
                                             <span class="text-gray-400">{{ formatDate(interview.createTime, 'date')
-                                                }}</span>
+                                            }}</span>
                                         </div>
 
                                         <div class="flex gap-1 items-center text-blue-500 transition-colors cursor-pointer hover:text-blue-700"
@@ -385,10 +411,35 @@ onMounted(() => {
                                                 回答
                                             </div>
                                             <MdPreview class="bg-gray-50" :modelValue="interview.answer" />
+
                                         </div>
                                         <div v-else class="p-4 text-gray-500 bg-gray-50 rounded-md">
                                             {{ interview.requirePremium && !isPremium ? '此答案需要会员权限才能查看' : '加载中...' }}
                                         </div>
+                                    </div>
+                                    <!-- 点赞/收藏操作区（居中，Antd官方icon） -->
+                                    <div v-if="answerVisibility[interview.id]"
+                                        class="flex justify-center gap-8 mt-6 items-center">
+                                        <button
+                                            class="rounded-full p-2 flex items-center gap-1 transition-colors focus:outline-none"
+                                            @click="handleLike(interview)">
+                                            <span :class="[
+                                                interview.isLiked ? 'text-blue-500' : 'text-gray-400',
+                                            ]">
+                                                <component :is="interview.isLiked ? LikeFilled : LikeOutlined" />
+                                            </span>
+                                            <span class="text-base font-semibold">{{ interview.likeCount }}</span>
+                                        </button>
+                                        <button
+                                            class="rounded-full p-2 flex items-center gap-1 transition-colors focus:outline-none"
+                                            @click="handleFavorite(interview)">
+                                            <span :class="[
+                                                interview.isFavorited ? 'text-yellow-400' : 'text-gray-400',
+                                            ]">
+                                                <component :is="interview.isFavorited ? StarFilled : StarOutlined" />
+                                            </span>
+                                            <span class="text-base font-semibold">{{ interview.favoriteCount }}</span>
+                                        </button>
                                     </div>
                                 </div>
                             </Card>
@@ -459,6 +510,7 @@ onMounted(() => {
     font-size: 12px;
     font-weight: bold;
 }
+
 // md编辑器限制图片宽度
 // :deep(.md-editor-preview-wrapper img),
 // :deep(.md-editor-content img) {

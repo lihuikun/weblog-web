@@ -2,6 +2,7 @@
  * 前端宝典分类选项
  */
 export const categoryOptions = [
+  { value: -1, label: '我的收藏' },
   { value: 0, label: 'AI' },
   { value: 3, label: 'HTML' },
   { value: 4, label: 'CSS' },
