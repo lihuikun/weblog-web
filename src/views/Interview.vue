@@ -203,7 +203,7 @@ watch([currentDifficulty, requirePremium], () => {
 
 const { sideMenuId } = defineProps<{ sideMenuId: string[] }>();
 // 监听路由变化
-watchEffect(() => {
+watch(() => sideMenuId[0], () => {
     // 避免重复初始化
     if (isInitialized.value && sideMenuId[0] === selectedCategory.value) {
         return
@@ -288,6 +288,7 @@ const handleFavorite = async (interview: InterviewType) => {
     try {
         await favoriteInterview(interview.id)
         interview.isFavorited = !interview.isFavorited
+        interview.favoriteCount += interview.isFavorited ? 1 : -1
     } catch (e) {
         message.error('操作失败')
     }
@@ -418,7 +419,7 @@ onMounted(() => {
                                         </div>
                                     </div>
                                     <!-- 点赞/收藏操作区（居中，Antd官方icon） -->
-                                    <div v-if="answerVisibility[interview.id]"
+                                    <div v-if="answerVisibility[interview.id]&& !interview.answer?.includes('该内容为VIP专享')"
                                         class="flex justify-center gap-8 mt-6 items-center">
                                         <button
                                             class="rounded-full p-2 flex items-center gap-1 transition-colors focus:outline-none"
