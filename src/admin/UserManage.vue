@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { message, Button, Popconfirm } from 'ant-design-vue'
 import { getUserList, deleteUser, updateUserPartial } from '@/api/user'
 import { useDateFormatter } from '@/hooks/useDateFormatter'
+import { roleList } from '@/constants/roles'
 
 const users = ref([])
 const loading = ref(false)
@@ -135,19 +136,6 @@ const columns = [
             )
         }
     }
-]
-
-const roleList = [
-    {
-        value: 'admin',
-        label: '超级管理员',
-    }, {
-        value: 'subAdmin',
-        label: '子管理员',
-    }, {
-        value: 'user',
-        label: '用户',
-    },
 ]
 
 const registerTypeList =

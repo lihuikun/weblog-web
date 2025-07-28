@@ -33,6 +33,11 @@ const goHome = () => {
     router.push('/')
 }
 
+// 前往个人资料页面
+const goProfile = () => {
+    router.push('/profile')
+}
+
 // 判断是否有管理员角色
 const isAdmin = computed(() => {
     return userStore.roles.includes('admin')
@@ -63,7 +68,7 @@ const showHomeButton = computed(() => !!props.homeButton)
         </div>
         <template #overlay>
             <AMenu>
-                <AMenuItem key="1">我的主页</AMenuItem>
+                <AMenuItem key="1" @click="goProfile">我的主页</AMenuItem>
                 <!-- 仅在非管理页面显示管理入口 -->
                 <AMenuItem v-if="isAdmin && !showHomeButton" key="admin" @click="goToAdmin">后台管理</AMenuItem>
                 <!-- 根据模式显示不同的按钮 -->

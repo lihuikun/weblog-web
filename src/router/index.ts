@@ -126,6 +126,17 @@ const mainRoutes: Array<RouteRecordRaw> = [
       layout: 'default',
     },
   },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/views/Profile.vue'),
+    meta: {
+      title: '我的主页',
+      keepAlive: true,
+      requiresAuth: true,
+      layout: 'default',
+    },
+  },
 ];
 
 // 404路由

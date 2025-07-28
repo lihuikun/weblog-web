@@ -8,4 +8,11 @@ export function deleteUser(id: number) {
 }
 export function updateUserPartial(id: any, data: any) {
     return request({ url: `/user/${id}`, method: 'put', data })
+}
+// 获取个人信息
+export function getUserProfile() {
+    return request({
+        url: '/user/profile',
+        method: 'get'
+    })
 } 
