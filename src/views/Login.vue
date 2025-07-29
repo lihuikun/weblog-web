@@ -95,20 +95,24 @@ const registerRules = {
         },
     ],
 };
-
+function setUserInfo(data: any) {
+    const {token,avatarUrl,nickname,role,email,id,isPremium} = data
+    userStore.setToken(token);
+    userStore.setUserInfo({
+        avatarUrl,
+        nickname,
+        roles: role,
+        email,
+        id,
+        isPremium
+    });
+}
 const handleLoginSubmit = async () => {
     try {
         loading.value = true;
         const { data } = await login(formState);
         if (data?.token) {
-            userStore.setToken(data.token);
-            userStore.setUserInfo({
-                avatarUrl: data.avatarUrl,
-                nickname: data.nickname,
-                roles: data.role,
-                email: data.email,
-                id: data.id
-            });
+           setUserInfo(data)
             message.success('登录成功');
             const redirect = route.query.redirect as string;
             router.push(redirect || '/');
@@ -210,16 +214,17 @@ async function handleGithubCallback() {
     console.log(code);
     if (!code) return
     const { data } = await githubLogin(code as string);
-    console.log("🚀 ~ handleGithubCallback ~ data:", data)
-    if (data?.token) {
-        userStore.setToken(data.token);
-        userStore.setUserInfo({
-            avatarUrl: data.avatarUrl,
-            nickname: data.nickname,
-            roles: data.role,
-            email: data.email,
-            id: data.id
-        });
+    const {token,avatarUrl,nickname,role,email,id,isPremium} = data
+    console.log("🚀 ~ handleGithubCallback ~ data:", {
+        avatarUrl,
+        nickname,
+        roles: role,
+        email,
+        id,
+        isPremium
+    })
+    if (token) {
+        setUserInfo(data)
         message.success('登录成功');
         // 跳转回首页去掉code
         const cleanUrl = new URL(window.location.href);

@@ -47,7 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="profile-main flex flex-col items-start px-12 py-12">
+  <div class="profile-main flex flex-col items-start px-12 py-12 bg-white text-white">
     <div class="flex items-center mb-8">
       <div class="profile-avatar-wrap mr-8">
         <Avatar :src="user?.avatarUrl" :size="56" />
@@ -87,7 +87,6 @@ onMounted(() => {
 
 <style scoped>
 .profile-main {
-  background: #fff;
   min-height: 100vh;
 }
 .profile-avatar-wrap {

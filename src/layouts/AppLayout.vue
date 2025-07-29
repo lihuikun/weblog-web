@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { BellOutlined, CaretDownOutlined } from '@ant-design/icons-vue';
+import { BellOutlined, CaretDownOutlined, CrownOutlined } from '@ant-design/icons-vue';
 import { theme, message } from 'ant-design-vue';
 import { useThemeStore } from '@/stores/themeStore';
 import moonIcon from '@/assets/icons/moon.png'
 import sunIcon from '@/assets/icons/sun.png'
+import vipIcon from '@/assets/vip.png'
 import { Menu } from '@/router/index';
 import { getPV, PV } from '@/api/pv';
 import logo from '@/assets/logo.jpg';
@@ -142,7 +143,9 @@ const fetchUnreadCount = async () => {
     }
 };
 const { isActive } = useVisibilityPolling(fetchUnreadCount, 5000, true)
-
+function handleVip() {
+    router.push('/vip')
+}
 
 // 组件挂载时启动轮询，卸载时停止轮询
 onMounted(() => {
@@ -187,18 +190,19 @@ watch(isActive, () => {
                     <div class="flex items-center space-x-4">
                         <!-- 通知图标只在登录后显示 -->
                         <template v-if="isLoggedIn">
-                            <a-badge :count="unreadCount" @click="handleMessage">
-                                <a-button type="text" shape="circle">
-                                    <template #icon>
-                                        <BellOutlined />
-                                    </template>
-                                </a-button>
-                            </a-badge>
+                            <BellOutlined class="cursor-pointer text-white" @click="handleMessage"/>
                         </template>
 
-                        <!-- 主题切换按钮 -->
-                        <div @click="toggleTheme">
-                            <img width="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
+                        <!-- PC端主题切换按钮 -->
+                        <div class="flex items-center h-8">
+                            <div class="flex items-center gap-2 cursor-pointer h-8">
+                                <span class="icon-wrap" @click="toggleTheme">
+                                    <img width="20" height="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
+                                </span>
+                                <span class="icon-wrap" @click="handleVip">
+                                    <img width="20" height="20" :src="vipIcon" alt="vip" style="margin-top:2px;" />
+                                </span>
+                            </div>
                         </div>
 
                         <!-- 根据登录状态显示不同的内容 -->
@@ -244,8 +248,10 @@ watch(isActive, () => {
 
                     <!-- 用户头像 -->
                     <div class="flex gap-3 items-center">
-                        <div @click="toggleTheme">
+                        <!-- 移动端主题切换按钮 -->
+                        <div @click="toggleTheme" class="flex items-center gap-2 cursor-pointer">
                             <img width="20" :src="themeStore.isDark ? moonIcon : sunIcon" alt="theme icon" />
+                            <CrownOutlined style="color:gold;font-size:20px;vertical-align:middle;" />
                         </div>
                         <template v-if="isLoggedIn">
                             <a-badge :count="unreadCount" @click="handleMessage">
@@ -304,7 +310,8 @@ watch(isActive, () => {
 
                     <!-- 内容区域 -->
                     <div ref="contentRef"
-                        class="overflow-y-auto md:px-6 h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1 shadow-lg md:ml-[10px] rounded-lg">
+                        :class="route.path === '/vip' ? 'content-container' : 'md:px-6'"
+                        class="overflow-y-auto h-[calc(100vh-120px)] bg-white xs:px-0 scrollbar-hide flex-1 shadow-lg md:ml-[10px] rounded-lg">
                         <slot :sideMenuId="sideMenuId" />
                     </div>
                 </a-layout>
@@ -359,5 +366,11 @@ watch(isActive, () => {
         width: 30px;
         height: 40px;
     }
+}
+.icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
 }
 </style>

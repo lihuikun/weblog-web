@@ -137,6 +137,17 @@ const mainRoutes: Array<RouteRecordRaw> = [
       layout: 'default',
     },
   },
+  {
+    path: '/vip',
+    name: 'Vip',
+    component: () => import('@/views/Vip.vue'),
+    meta: {
+      title: '会员权益',
+      keepAlive: true,
+      requiresAuth: false,
+      layout: 'default',
+    },
+  },
 ];
 
 // 404路由
