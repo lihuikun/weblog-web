@@ -213,7 +213,7 @@ const columns = [
             rel="noopener noreferrer"
             class="text-blue-500 hover:text-blue-700"
           >
-            {record.downloadUrl}
+              {record.downloadUrl.split('/').pop()}
           </a>
          </Tooltip>
         </div>
