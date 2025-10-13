@@ -7,6 +7,7 @@ export interface ResumeTemplate {
   previewImageUrl: string
   downloadUrl: string
   isPremium: boolean
+  color?: string
   createTime?: string
   updatedTime?: string
 }
@@ -19,6 +20,7 @@ export interface CreateResumeTemplateRequest {
   previewImageUrl: string
   downloadUrl: string
   isPremium: boolean
+  color?: string
 }
 
 /**
@@ -29,6 +31,7 @@ export interface UpdateResumeTemplateRequest {
   previewImageUrl?: string
   downloadUrl?: string
   isPremium?: boolean
+  color?: string
 }
 
 /**

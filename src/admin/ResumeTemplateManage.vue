@@ -24,6 +24,19 @@ const editForm = ref<CreateResumeTemplateRequest>({
   isPremium: false
 })
 
+// 颜色选择
+const selectedColor = ref('')
+const colorOptions = [
+  "#C0B9AE", 
+  "#4D8282", 
+  "#F4EADC", 
+  "#8BAB8D", 
+  "#E5DCD3", 
+  "#589FA0", 
+  "#DCDCD5", 
+  "#F0F0F1"  
+]
+
 // 上传状态
 const previewImageUploading = ref(false)
 const downloadFileUploading = ref(false)
@@ -68,9 +81,10 @@ const handleEdit = (template: ResumeTemplate) => {
     isPremium: template.isPremium
   }
   
-  // 设置文件URL
+  // 设置文件URL和颜色
   previewImageUrl.value = template.previewImageUrl || ''
   downloadFileUrl.value = template.downloadUrl || ''
+  selectedColor.value = template.color || ''
   
   showEditModal.value = true
 }
@@ -83,9 +97,10 @@ const handleCreate = () => {
     isPremium: false
   }
   
-  // 清空文件URL
+  // 清空文件URL和颜色
   previewImageUrl.value = ''
   downloadFileUrl.value = ''
+  selectedColor.value = ''
   
   showCreateModal.value = true
 }
@@ -94,7 +109,8 @@ const handleUpdate = async () => {
   if (!editingTemplate.value) return
   
   try {
-    await updateResumeTemplate(editingTemplate.value.id, editForm.value)
+    const updateData = { ...editForm.value, color: selectedColor.value }
+    await updateResumeTemplate(editingTemplate.value.id, updateData)
     message.success('更新成功')
     showEditModal.value = false
     fetchTemplates()
@@ -105,7 +121,8 @@ const handleUpdate = async () => {
 
 const handleCreateSubmit = async () => {
   try {
-    await createResumeTemplate(editForm.value)
+    const createData = { ...editForm.value, color: selectedColor.value }
+    await createResumeTemplate(createData)
     message.success('创建成功')
     showCreateModal.value = false
     fetchTemplates()
@@ -220,6 +237,27 @@ const columns = [
       )
   },
   {
+    title: '主题颜色',
+    dataIndex: 'color',
+    key: 'color',
+    width: 120,
+    customRender: ({ record }: { record: ResumeTemplate }) => (
+      <div class="flex items-center">
+        {record.color ? (
+          <div class="flex items-center">
+            <div 
+              class="mr-2 w-6 h-6 rounded-full border border-gray-300" 
+              style={{ backgroundColor: record.color }}
+            />
+            <span class="text-sm text-gray-600">{record.color}</span>
+          </div>
+        ) : (
+          <span class="text-gray-400">未设置</span>
+        )}
+      </div>
+    )
+  },
+  {
     title: '是否付费',
     dataIndex: 'isPremium',
     key: 'isPremium',
@@ -301,7 +339,8 @@ onMounted(fetchTemplates)
             <AInput v-model:value="editForm.name" placeholder="请输入模板名称" />
           </AFormItem>
           <AFormItem label="预览图" required>
-            <div v-if="previewImageUrl" class="inline-block relative">
+            <div v-if="previewImageUrl" class="inline-block relative py-[25px] px-[15px] rounded-[6px]"
+              :style="{ background: selectedColor }">
               <img :src="previewImageUrl" alt="预览图"
                 class="object-cover w-32 h-24 rounded border transition-opacity cursor-pointer hover:opacity-80"
                 @click="() => hiddenPreviewUpload.value?.$el.querySelector('input[type=file]')?.click()" />
@@ -339,6 +378,22 @@ onMounted(fetchTemplates)
               </Button>
             </AUpload>
           </AFormItem>
+          <AFormItem label="主题颜色">
+            <div class="flex flex-wrap gap-2">
+              <div v-for="color in colorOptions" :key="color"
+                class="w-8 h-8 rounded-full border-2 transition-all cursor-pointer hover:scale-110"
+                :class="selectedColor === color ? 'border-gray-800 ring-2 ring-gray-300' : 'border-gray-300'"
+                :style="{ backgroundColor: color }" @click="selectedColor = color" />
+              <div
+                class="flex justify-center items-center w-8 h-8 text-gray-400 rounded-full border-2 border-gray-300 cursor-pointer hover:bg-gray-50"
+                @click="selectedColor = ''">
+                ×
+              </div>
+            </div>
+            <div v-if="selectedColor" class="mt-2 text-sm text-gray-600">
+              已选择: {{ selectedColor }}
+            </div>
+          </AFormItem>
           <AFormItem label="是否付费">
             <Switch v-model:checked="editForm.isPremium" />
             <span class="ml-2 text-gray-500">开启后为付费模板</span>
@@ -356,6 +411,7 @@ onMounted(fetchTemplates)
             <div v-if="previewImageUrl" class="inline-block relative">
               <img :src="previewImageUrl" alt="预览图"
                 class="object-cover w-32 h-24 rounded border transition-opacity cursor-pointer hover:opacity-80"
+                :style="{ borderColor: selectedColor, borderWidth: selectedColor ? '3px' : '1px' }"
                 @click="() => hiddenPreviewUploadCreate.value?.$el.querySelector('input[type=file]')?.click()" />
               <Button type="text" danger size="small"
                 class="flex absolute -top-2 -right-2 z-10 justify-center items-center p-0 w-6 h-6 text-white bg-red-500 rounded-full border-0 min-w-6 hover:bg-red-600"
@@ -392,6 +448,22 @@ onMounted(fetchTemplates)
                 上传文件
               </Button>
             </AUpload>
+          </AFormItem>
+          <AFormItem label="主题颜色">
+            <div class="flex flex-wrap gap-2">
+              <div v-for="color in colorOptions" :key="color"
+                class="w-8 h-8 rounded-full border-2 transition-all cursor-pointer hover:scale-110"
+                :class="selectedColor === color ? 'border-gray-800 ring-2 ring-gray-300' : 'border-gray-300'"
+                :style="{ backgroundColor: color }" @click="selectedColor = color" />
+              <div
+                class="flex justify-center items-center w-8 h-8 text-gray-400 rounded-full border-2 border-gray-300 cursor-pointer hover:bg-gray-50"
+                @click="selectedColor = ''">
+                ×
+              </div>
+            </div>
+            <div v-if="selectedColor" class="mt-2 text-sm text-gray-600">
+              已选择: {{ selectedColor }}
+            </div>
           </AFormItem>
           <AFormItem label="是否付费">
             <Switch v-model:checked="editForm.isPremium" />
