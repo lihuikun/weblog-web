@@ -46,6 +46,18 @@ const adminRoutes: Array<RouteRecordRaw> = [
         },
     },
     
+    {
+        path: '/admin/resume-template-manage',
+        name: 'ResumeTemplateManage',
+        component: () => import('@/admin/ResumeTemplateManage.vue'),
+        meta: {
+            title: '简历模板管理',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin', 'subAdmin'],
+            layout: 'admin'
+        },
+    },
 ];
 
 export default adminRoutes; 

@@ -7,6 +7,10 @@
     {
       "source": "/upload/:path*",
       "destination": "http://lihk.serv00.net:13381/api/:path*"
+    },
+    {
+      "source": "/r2-upload/:path*",
+      "destination": "https://upload-web.lihk180.dpdns.org/:path*"
     }
   ]
 }

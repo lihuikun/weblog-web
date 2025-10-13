@@ -43,6 +43,11 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_UPLOAD_BASE_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/upload/, '')
+        },
+        '/r2-upload': {
+          target: 'https://upload-web.lihk180.dpdns.org',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/r2-upload/, '')
         }
       }
     },
