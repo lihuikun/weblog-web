@@ -169,11 +169,11 @@ onMounted(fetchUsers)
             <h2 class="mb-4 text-xl font-bold text-white">用户管理</h2>
             
             <!-- 搜索框 -->
-            <div class="mb-4 flex">
+            <div class="flex mb-4">
                 <AInput 
                     v-model:value="keyword" 
                     placeholder="请输入用户名或邮箱搜索" 
-                    class="w-64 mr-2"
+                    class="mr-2 w-64"
                     allowClear
                     @pressEnter="handleSearch"
                 />

@@ -58,6 +58,18 @@ const adminRoutes: Array<RouteRecordRaw> = [
             layout: 'admin'
         },
     },
+    {
+        path: '/admin/guestbook-manage',
+        name: 'GuestbookManage',
+        component: () => import('@/admin/GuestbookManage.vue'),
+        meta: {
+            title: '留言板管理',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin', 'subAdmin'],
+            layout: 'admin'
+        },
+    },
 ];
 
 export default adminRoutes; 
