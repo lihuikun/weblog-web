@@ -45,6 +45,18 @@ const adminRoutes: Array<RouteRecordRaw> = [
             layout: 'admin'
         },
     },
+    {
+        path: '/admin/database-manage',
+        name: 'DatabaseManage',
+        component: () => import('@/admin/DatabaseManage.vue'),
+        meta: {
+            title: '数据库管理',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin', 'subAdmin'],
+            layout: 'admin'
+        },
+    },
     
     {
         path: '/admin/resume-template-manage',
