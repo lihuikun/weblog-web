@@ -11,13 +11,19 @@ const router = useRouter();
 const userStore = useUserStore();
 const route = useRoute();
 
-// 从路由配置中动态获取管理员菜单项
+// 从路由配置中动态获取管理员菜单项（按当前用户角色过滤）
 const menuItems = computed(() => {
-    return adminRoutes.map(route => ({
-        key: route.name as string,
-        label: route.meta?.title as string,
-        path: route.path
-    }));
+    return adminRoutes
+        .filter(route => {
+            const roles = route.meta?.roles as string[] | undefined;
+            if (!roles || roles.length === 0) return true;
+            return roles.some(role => userStore.roles.includes(role));
+        })
+        .map(route => ({
+            key: route.name as string,
+            label: route.meta?.title as string,
+            path: route.path
+        }));
 });
 
 const selectedKeys = ref<string[]>([]);
