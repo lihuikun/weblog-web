@@ -45,6 +45,30 @@ const adminRoutes: Array<RouteRecordRaw> = [
             layout: 'admin'
         },
     },
+    {
+        path: '/admin/square-category-manage',
+        name: 'SquareCategoryManage',
+        component: () => import('@/admin/SquareCategoryManage.vue'),
+        meta: {
+            title: '广场分类管理',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin'],
+            layout: 'admin'
+        },
+    },
+    {
+        path: '/admin/square-menu-manage',
+        name: 'SquareMenuManage',
+        component: () => import('@/admin/SquareMenuManage.vue'),
+        meta: {
+            title: '广场菜单管理',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin', 'subAdmin'],
+            layout: 'admin'
+        },
+    },
 ];
 
 export default adminRoutes; 
