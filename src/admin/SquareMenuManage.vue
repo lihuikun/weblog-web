@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { ref, onMounted, computed } from 'vue'
 import { message, Button, Select, Popconfirm } from 'ant-design-vue'
-import { getSquareMenuList, updateSquareMenuCategory } from '@/api/menu'
+import { getSquareMenuList, updateSquareMenuCategory, deleteSquareMenu } from '@/api/menu'
 import { getSquareCategoryList } from '@/api/squareCategory'
 import { useUserStore } from '@/stores/userStore'
 import { useDateFormatter } from '@/hooks/useDateFormatter'
@@ -70,6 +70,12 @@ const handleUpdateCategory = async () => {
     fetchMenus()
 }
 
+const handleDelete = async (id: number) => {
+    await deleteSquareMenu(id)
+    message.success('删除成功')
+    fetchMenus()
+}
+
 const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: '菜名', dataIndex: 'title', key: 'title', width: 160 },
@@ -103,12 +109,17 @@ const columns = [
     {
         title: '操作',
         key: 'action',
-        width: 120,
+        width: 160,
         customRender: ({ record }: any) => {
             return (
                 <div>
                     {isAdmin.value && (
                         <Button type="link" onClick={() => openEditCategory(record)}>修改分类</Button>
+                    )}
+                    {isAdmin.value && (
+                        <Popconfirm title="确定删除该广场菜单？" onConfirm={() => handleDelete(record.id)}>
+                            <Button type="link" danger>删除</Button>
+                        </Popconfirm>
                     )}
                 </div>
             )

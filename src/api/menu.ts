@@ -6,3 +6,6 @@ export function getSquareMenuList(params: { page?: number; pageSize?: number; ke
 export function updateSquareMenuCategory(id: number, data: { squareCategoryId: number }) {
     return request({ url: `/menu/square/${id}/category`, method: 'put', data })
 }
+export function deleteSquareMenu(id: number) {
+    return request({ url: `/menu/square/${id}`, method: 'delete' })
+}
