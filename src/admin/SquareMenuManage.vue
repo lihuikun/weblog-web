@@ -138,9 +138,9 @@ onMounted(() => {
                 :pagination="{ current: page, pageSize, total, onChange: handlePageChange }">
             </ATable>
             <AModal v-model:open="showCategoryModal" title="修改广场分类" @ok="handleUpdateCategory">
-                <ASelect v-model:value="selectedSquareCategory" placeholder="选择广场分类" style="width: 100%">
-                    <ASelectOption v-for="cat in squareCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</ASelectOption>
-                </ASelect>
+                <ARadioGroup v-model:value="selectedSquareCategory" class="flex flex-col gap-2">
+                    <ARadio v-for="cat in squareCategories" :key="cat.id" :value="cat.id">{{ cat.name }}</ARadio>
+                </ARadioGroup>
             </AModal>
         </div>
     </div>
