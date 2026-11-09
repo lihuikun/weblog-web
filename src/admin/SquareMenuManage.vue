@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { ref, onMounted, computed } from 'vue'
-import { message, Button, Select, Popconfirm } from 'ant-design-vue'
-import { getSquareMenuList, updateSquareMenuCategory, deleteSquareMenu } from '@/api/menu'
+import { message, Button, Select, Popconfirm, Switch } from 'ant-design-vue'
+import { getSquareMenuList, updateSquareMenuCategory, updateSquareMenuHidden, deleteSquareMenu } from '@/api/menu'
 import { getSquareCategoryList } from '@/api/squareCategory'
 import { useUserStore } from '@/stores/userStore'
 import { useDateFormatter } from '@/hooks/useDateFormatter'
@@ -35,6 +35,7 @@ const fetchMenus = async () => {
         pageSize: pageSize.value,
         keyword: keyword.value || undefined,
         squareCategoryId: selectedCategoryId.value,
+        includeHidden: true,
     })
     menus.value = data.list
     total.value = data.total
@@ -76,6 +77,12 @@ const handleDelete = async (id: number) => {
     fetchMenus()
 }
 
+const handleToggleHidden = async (record: any, checked: boolean) => {
+    await updateSquareMenuHidden(record.id, { hidden: !checked })
+    record.squareHidden = !checked
+    message.success(checked ? '已恢复广场展示' : '已从广场隐藏')
+}
+
 const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: '菜名', dataIndex: 'title', key: 'title', width: 160 },
@@ -104,6 +111,22 @@ const columns = [
         width: 160,
         customRender: ({ record }: any) => {
             return <div>{formatDate(record.createTime, 'time')}</div>
+        }
+    },
+    {
+        title: '广场展示',
+        key: 'squareHidden',
+        width: 100,
+        customRender: ({ record }: any) => {
+            if (!isAdmin.value) {
+                return <span>{record.squareHidden ? '已隐藏' : '展示中'}</span>
+            }
+            return (
+                <Switch
+                    checked={!record.squareHidden}
+                    onChange={(checked) => handleToggleHidden(record, checked as boolean)}
+                />
+            )
         }
     },
     {
