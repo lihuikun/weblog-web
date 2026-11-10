@@ -131,11 +131,15 @@ const registerTypeList =
             label: '邮箱',
         },
         {
-            value: 'mini',
+            value: 'wechat_mini',
             label: '微信小程序',
         },
         {
-            value: 'official',
+            value: 'wechat_game',
+            label: '微信小游戏',
+        },
+        {
+            value: 'wechat_official',
             label: '微信公众号',
         },
         {
