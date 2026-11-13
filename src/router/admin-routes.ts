@@ -106,6 +106,18 @@ const adminRoutes: Array<RouteRecordRaw> = [
             layout: 'admin'
         },
     },
+    {
+        path: '/admin/feature-switch-manage',
+        name: 'FeatureSwitchManage',
+        component: () => import('@/admin/FeatureSwitchManage.vue'),
+        meta: {
+            title: '功能开关',
+            keepAlive: true,
+            requiresAuth: true,
+            roles: ['admin', 'subAdmin'],
+            layout: 'admin'
+        },
+    },
 ];
 
 export default adminRoutes; 
