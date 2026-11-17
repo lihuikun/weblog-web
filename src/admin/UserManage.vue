@@ -64,7 +64,8 @@ const handleUpdate = async () => {
 
 const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
-    { title: 'openId', dataIndex: 'openId', key: 'openId', width: 80 },
+    { title: 'openId', dataIndex: 'openId', key: 'openId', width: 160 },
+    { title: 'gameOpenId', dataIndex: 'gameOpenId', key: 'gameOpenId', width: 160 },
     { title: '用户名', dataIndex: 'nickname', key: 'nickname', width: 120 },
     { title: '邮箱', dataIndex: 'email', key: 'email', width: 180 },
     {
@@ -86,11 +87,8 @@ const columns = [
         key: 'registerType',
         width: 120,
         customRender: ({ record }: any) => {
-            return (
-                <div>
-                    {registerTypeList.find((item: any) => item.value === record.loginType)?.label}
-                </div>
-            )
+            const matched = registerTypeList.find((item: any) => item.value === record.loginType)
+            return <div>{matched?.label || record.loginType || '-'}</div>
         }
     },
     {
@@ -145,11 +143,15 @@ const registerTypeList =
             label: '邮箱',
         },
         {
-            value: 'mini',
+            value: 'wechat_mini',
             label: '微信小程序',
         },
         {
-            value: 'official',
+            value: 'wechat_game',
+            label: '微信小游戏',
+        },
+        {
+            value: 'wechat_official',
             label: '微信公众号',
         },
         {
