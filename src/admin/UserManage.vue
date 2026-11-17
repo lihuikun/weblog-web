@@ -64,8 +64,18 @@ const handleUpdate = async () => {
 
 const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
-    { title: 'openId', dataIndex: 'openId', key: 'openId', width: 160 },
-    { title: 'gameOpenId', dataIndex: 'gameOpenId', key: 'gameOpenId', width: 160 },
+    {
+        title: 'openId / gameId',
+        dataIndex: 'openId',
+        key: 'openId',
+        width: 220,
+        customRender: ({ record }: any) => (
+            <div>
+                <div>openId: {record.openId || '-'}</div>
+                <div>gameId: {record.gameOpenId || '-'}</div>
+            </div>
+        )
+    },
     { title: '用户名', dataIndex: 'nickname', key: 'nickname', width: 120 },
     { title: '邮箱', dataIndex: 'email', key: 'email', width: 180 },
     {
